@@ -32,9 +32,9 @@ router.get('/', async(req, res) => {
         let temp = {
                 "id": notification[i].id,
                 "type": notification[i].type,
-                "is_read": notification[i].is_readname,
+                "is_read": notification[i].is_read,
                 "image": notification[i].picture,
-                "created_at": notification[i].created_at,
+                "created_at": notification[i].formatted_created_at,
                 "summary": `${notification[i].name}邀請你成為好友`
             };
         notification_result.push(temp);
