@@ -48,24 +48,10 @@ router.get('/', verifyAccesstoken, async(req, res) => {
 });
 
 
-router.post('/:event_id/read', async(req, res) => {
+router.post('/:event_id/read', verifyAccesstoken, async(req, res) => {
     const connection = await connectionPromise;
-    let token = req.headers.authorization;
     const event_id = req.params.event_id;
-    if(!token){
-        res.status(401).json({error : 'No token'});
-        return;
-    }
-    token = token.substring(7, token.length);
-    try {
-        var decoded = jwt.verify(token, process.env.SECRETKEY);
-    } 
-    catch(err) {
-        res.status(403).json({error : 'Wrong token'});
-        console.log(err);
-        return;
-    }
-    const my_id = decoded.id;
+    const my_id = req.decoded.id;
 
     let mysQuery = 'SELECT `id` FROM `events` WHERE `receiver_id` = ? AND `id` = ?';
     const [event] = await connection.execute(mysQuery, [my_id, event_id]);

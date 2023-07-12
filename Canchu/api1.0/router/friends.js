@@ -4,32 +4,20 @@ const jwt = require('jsonwebtoken');
 
 // create the connection nod to database
 const connectionPromise = require('../models/mysql').connectionPromise;
+const verifyAccesstoken = require('../models/function').verifyAccesstoken;
 
 
-router.post('/:user_id/request', async(req, res) => {
+router.post('/:user_id/request', verifyAccesstoken, async(req, res) => {
     const connection = await connectionPromise;
     const receiver_id = req.params.user_id;
-    let token = req.headers.authorization;
-    if(!token){
-        res.status(401).json({error : 'No token'});
-        return;
-    }
-    token = token.substring(7, token.length);
-    try {
-        var decoded = jwt.verify(token, process.env.SECRETKEY);
-    } 
-    catch(err) {
-        res.status(403).json({error : 'Wrong token'});
-        console.log(err);
-        return;
-    }
+    const sender_id = req.decoded.id
+
     let mysQuery = 'SELECT `id` FROM `users` WHERE `id` = ?';
     const [is_receiver_exist] = await connection.execute(mysQuery, [receiver_id]);
     if(!is_receiver_exist.length){
         res.status(400).json({error : 'This user is not exist.'});
         return;
     }
-    const sender_id = decoded.id
     mysQuery = 'SELECT `is_friend` FROM `friendship` WHERE `sender_id` = ? AND `receiver_id` = ?';
     let [friendship] = await connection.execute(mysQuery, [sender_id, receiver_id]);
     if(friendship.length){
@@ -66,23 +54,10 @@ router.post('/:user_id/request', async(req, res) => {
 });
 
 
-router.get('/pending', async(req, res) => {
+router.get('/pending', verifyAccesstoken, async(req, res) => {
     const connection = await connectionPromise;
-    let token = req.headers.authorization;
-    if(!token){
-        res.status(401).json({error : 'No token'});
-        return;
-    }
-    token = token.substring(7, token.length);
-    try {
-        var decoded = jwt.verify(token, process.env.SECRETKEY);
-    } 
-    catch(err) {
-        res.status(403).json({error : 'Wrong token'});
-        console.log(err);
-        return;
-    }
-    const my_id = decoded.id;
+    const my_id = req.decoded.id;
+
     mysQuery = 'SELECT `users`.`id` AS `user_id`, `name`, `picture`, `friendship`.`id` AS `friendship_id` FROM `users` JOIN `friendship` ON `users`.`id` = `sender_id` WHERE `receiver_id` = ? AND `is_friend` = false';
     const [pending] = await connection.execute(mysQuery, [my_id]);
     console.log(pending);
@@ -108,24 +83,10 @@ router.get('/pending', async(req, res) => {
 });
 
 
-router.post('/:friendship_id/agree', async(req, res) => {
+router.post('/:friendship_id/agree', verifyAccesstoken, async(req, res) => {
     const connection = await connectionPromise;
-    let token = req.headers.authorization;
     const friendship_id = req.params.friendship_id;
-    if(!token){
-        res.status(401).json({error : 'No token'});
-        return;
-    }
-    token = token.substring(7, token.length);
-    try {
-        var decoded = jwt.verify(token, process.env.SECRETKEY);
-    } 
-    catch(err) {
-        res.status(403).json({error : 'Wrong token'});
-        console.log(err);
-        return;
-    }
-    const my_id = decoded.id;
+    const my_id = req.decoded.id;
 
     let mysQuery = 'SELECT `is_friend`, `receiver_id`, `sender_id` FROM `friendship` WHERE `id` = ?';
     const [request_exist] = await connection.execute(mysQuery, [friendship_id]);
@@ -164,24 +125,11 @@ router.post('/:friendship_id/agree', async(req, res) => {
 });
 
 
-router.delete('/:friendship_id', async(req, res) => {
+router.delete('/:friendship_id', verifyAccesstoken, async(req, res) => {
     const connection = await connectionPromise;
-    let token = req.headers.authorization;
     const friendship_id = req.params.friendship_id;
-    if(!token){
-        res.status(401).json({error : 'No token'});
-        return;
-    }
-    token = token.substring(7, token.length);
-    try {
-        var decoded = jwt.verify(token, process.env.SECRETKEY);
-    } 
-    catch(err) {
-        res.status(403).json({error : 'Wrong token'});
-        console.log(err);
-        return;
-    }
-    const my_id = decoded.id;
+    const my_id = req.decoded.id;
+
     let mysQuery = 'SELECT `is_friend`, `sender_id`, `receiver_id` FROM `friendship` WHERE `id` = ?';
     const [relation_exist] = await connection.execute(mysQuery, [friendship_id]);
     if(!relation_exist.length){

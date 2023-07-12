@@ -7,6 +7,7 @@ const multer = require('multer');
 
 // create the connection nod to database
 const connectionPromise = require('../models/mysql').connectionPromise;
+const verifyAccesstoken = require('../models/function').verifyAccesstoken;
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -163,23 +164,10 @@ router.post('/signin', async(req, res) => {
 });
 
 
-router.get('/:id/profile', async(req, res) => {
+router.get('/:id/profile', verifyAccesstoken, async(req, res) => {
     const connection = await connectionPromise;
     const userId = Number(req.params.id);
-    let token = req.headers.authorization;
-    if(!token){
-        res.status(401).json({error : 'No token'});
-        return;
-    }
-    token = token.substring(7, token.length);
-    try {
-        var decoded = jwt.verify(token, process.env.SECRETKEY);
-    } 
-    catch(err) {
-        res.status(403).json({error : 'Wrong token'});
-        console.log(err);
-        return;
-    }
+
     const mysqlQuery = 'SELECT * FROM `users` WHERE `id` = ?';
     const [rows] = await connection.execute(mysqlQuery, [userId]);
     console.log(rows[0]);
@@ -203,23 +191,9 @@ router.get('/:id/profile', async(req, res) => {
 });
 
 
-router.put('/profile', async(req, res) => {
+router.put('/profile', verifyAccesstoken, async(req, res) => {
     const connection = await connectionPromise;
-    let token = req.headers.authorization;
-    if(!token){
-        res.status(401).json({error : 'No token'});
-        return;
-    }
-    token = token.substring(7, token.length);
-    try {
-        var decoded = jwt.verify(token, process.env.SECRETKEY);
-    } 
-    catch(err) {
-        res.status(403).json({error : 'Wrong token'});
-        console.log(err);
-        return;
-    }
-    id = decoded.id;
+    const id = req.decoded.id;
     const { name, introduction, tags } = req.body;
     let mysQuery = 'update users set `name` = ?, `intro` = ?, `tags` = ? where `id` = ?';
     const [rows] = await connection.execute(mysQuery, [name, introduction, tags, id]);
@@ -234,23 +208,9 @@ router.put('/profile', async(req, res) => {
 });
 
 
-router.put('/picture', upload.single('picture'), async(req, res) => {
+router.put('/picture', verifyAccesstoken, upload.single('picture'), async(req, res) => {
     const connection = await connectionPromise;
-    let token = req.headers.authorization;
-    if(!token){
-        res.status(401).json({error : 'No token'});
-        return;
-    }
-    token = token.substring(7, token.length);
-    try {
-        var decoded = jwt.verify(token, process.env.SECRETKEY);
-    } 
-    catch(err) {
-        res.status(403).json({error : 'Wrong token'});
-        console.log(err);
-        return;
-    }
-    id = decoded.id;
+    const id = req.decoded.id;
     const picture = req.file;
     const url = `http://52.64.240.159/${picture.filename}`
     result = {
