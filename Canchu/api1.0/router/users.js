@@ -208,12 +208,11 @@ router.put('/profile', verifyAccesstoken, async(req, res) => {
 });
 
 
-router.put('/picture', upload.single('picture'), verifyAccesstoken, async(req, res) => {
+router.put('/picture', verifyAccesstoken, upload.single('picture'), async(req, res) => {
     const connection = await connectionPromise;
     const id = req.decoded.id;
     const picture = req.file;
-    console.log(req);
-    console.log(picture);
+    
     const url = `http://52.64.240.159/${picture.filename}`
     result = {
         "data": {
