@@ -3,7 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 
 // create the connection nod to database
-const connection = require('../models/mysql').connection;
+const connectionPromise = require('../models/mysql').connectionPromise;
 
 
 router.post('/:user_id/request', async(req, res) => {
@@ -52,6 +52,9 @@ router.post('/:user_id/request', async(req, res) => {
     }
     mysQuery = 'INSERT INTO `friendship`(`sender_id`, `receiver_id`, `is_friend`) VALUES(?,?,?)';
     const [rows] = await connection.execute(mysQuery, [sender_id, receiver_id, false]);
+    const type = 'friend request'
+    mysQuery = 'INSERT INTO `events`(`sender_id`, `receiver_id`, `type`, `is_read`, `created_at`) VALUES(?,?,?,?,NOW())';
+    const [event] = await connection.execute(mysQuery, [sender_id, receiver_id, type, false]);
     result = {
         "data": {
             "friendship": {
