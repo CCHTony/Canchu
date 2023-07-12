@@ -79,7 +79,7 @@ router.post('/:event_id/read', async(req, res) => {
     }
     const my_id = decoded.id;
 
-    let mysQuery = 'SELECT `id` AS `eventid` FROM `events` WHERE `receiver_id` = ? AND `id` = ?';
+    let mysQuery = 'SELECT `id` FROM `events` WHERE `receiver_id` = ? AND `id` = ?';
     const [event] = await connection.execute(mysQuery, [my_id, event_id]);
     if(event.length === 0){
         res.status(400).json({error : 'You do not have this event!'})
@@ -87,10 +87,11 @@ router.post('/:event_id/read', async(req, res) => {
     }
     mysQuery = 'UPDATE `events` SET `is_read` = TRUE WHERE `id` = ?';
     const [update] = await connection.execute(mysQuery, [event_id]);
+    console.log(event);
     const result = {
         "data": {
             "event": {
-                "id": event.eventid
+                "id": event_id
             }
         }
     }
