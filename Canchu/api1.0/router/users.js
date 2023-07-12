@@ -212,6 +212,7 @@ router.put('/picture', verifyAccesstoken, upload.single('picture'), async(req, r
     const connection = await connectionPromise;
     const id = req.decoded.id;
     const picture = req.file;
+    console.log(req);
     console.log(picture);
     const url = `http://52.64.240.159/${picture.filename}`
     result = {
