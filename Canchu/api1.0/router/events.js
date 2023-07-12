@@ -43,7 +43,7 @@ router.get('/', async(req, res) => {
             TOF = true;
         }
         let temp = {
-                "id": notification[i].event_id,
+                "id": notification[i].events_id,
                 "type": notification[i].type,
                 "is_read": TOF,
                 "image": notification[i].picture,
