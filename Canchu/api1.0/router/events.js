@@ -24,7 +24,7 @@ router.get('/', async(req, res) => {
     const my_id = decoded.id;
 
     let notification_result = [];
-    let mysQuery = 'SELECT `events`.`id` AS `events_id`, `type`, `is_read`, DATE_FORMAT(`created_at`, "%Y-%m-%d %H:%i:%s") AS `formatted_created_at`, `name`, `picture` FROM `users` JOIN `events` ON `users`.`id` = `events`.`sender_id` WHERE `receiver_id` = ?';
+    let mysQuery = 'SELECT `events`.`id` AS `events_id`, `type`, IF(`is_read` = 1, "true", "false") AS `is_read`, DATE_FORMAT(`created_at`, "%Y-%m-%d %H:%i:%s") AS `formatted_created_at`, `name`, `picture` FROM `users` JOIN `events` ON `users`.`id` = `events`.`sender_id` WHERE `receiver_id` = ?';
     const [notification] = await connection.execute(mysQuery, [my_id]);
     console.log(notification);
     
