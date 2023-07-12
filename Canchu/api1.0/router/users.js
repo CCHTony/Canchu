@@ -6,7 +6,7 @@ const multer = require('multer');
 
 
 // create the connection nod to database
-const connection = require('../models/mysql')
+const connection = require('../models/mysql').Connect
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
