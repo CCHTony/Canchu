@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 // create the connection nod to database
 const connectionPromise = require('../models/mysql').connectionPromise;
-const verifyAccesstoken = require('../models/function').verifyAccesstoken;
+const { verifyAccesstoken } = require('../models/function');
 
 router.get('/', verifyAccesstoken, async(req, res) => {
     const connection = await connectionPromise;
