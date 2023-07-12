@@ -13,6 +13,6 @@ app.use('/api/1.0/users', usersRouter);
 app.use('/api/1.0/friends', friendsRouter);
 
 
-app.listen(3000, async() => {
+app.listen(3000, () => {
     console.log('Server is running');
 });
