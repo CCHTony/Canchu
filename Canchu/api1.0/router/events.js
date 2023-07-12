@@ -4,24 +4,11 @@ const jwt = require('jsonwebtoken');
 
 // create the connection nod to database
 const connectionPromise = require('../models/mysql').connectionPromise;
+const verifyAccesstoken = require('../models/function').verifyAccesstoken;
 
-router.get('/', async(req, res) => {
+router.get('/', verifyAccesstoken, async(req, res) => {
     const connection = await connectionPromise;
-    let token = req.headers.authorization;
-    if(!token){
-        res.status(401).json({error : 'No token'});
-        return;
-    }
-    token = token.substring(7, token.length);
-    try {
-        var decoded = jwt.verify(token, process.env.SECRETKEY);
-    } 
-    catch(err) {
-        res.status(403).json({error : 'Wrong token'});
-        console.log(err);
-        return;
-    }
-    const my_id = decoded.id;
+    const my_id = req.decoded.id;
 
     let notification_result = [];
     let mysQuery = 'SELECT `events`.`id` AS `events_id`, `type`, `is_read`, DATE_FORMAT(`created_at`, "%Y-%m-%d %H:%i:%s") AS `formatted_created_at`, `name`, `picture` FROM `users` JOIN `events` ON `users`.`id` = `events`.`sender_id` WHERE `receiver_id` = ?';
@@ -59,6 +46,7 @@ router.get('/', async(req, res) => {
     };
     res.json(result);
 });
+
 
 router.post('/:event_id/read', async(req, res) => {
     const connection = await connectionPromise;
