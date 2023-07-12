@@ -31,10 +31,10 @@ router.get('/', async(req, res) => {
     for(let i = 0; i < notification.length; i++){
         let TOF;
         if(notification[i].is_read === 0){
-            let TOF = false;
+            TOF = false;
         }
         else{
-            let TOF = true;
+            TOF = true;
         }
         let temp = {
                 "id": notification[i].id,
