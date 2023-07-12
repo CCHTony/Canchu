@@ -24,7 +24,7 @@ router.get('/', async(req, res) => {
     const my_id = decoded.id;
 
     let notification_result = [];
-    let mysQuery = 'SELECT `events`.`id` AS `events_id`, `type`, `is_read`, `created_at`, `name`, `picture` FROM `users` JOIN `events` ON `users`.`id` = `events`.`sender_id` WHERE `receiver_id` = ?';
+    let mysQuery = 'SELECT `events`.`id` AS `events_id`, `type`, `is_read`, DATE_FORMAT(`created_at`, "%Y-%m-%d %H:%i:%s") AS `formatted_created_at`, `name`, `picture` FROM `users` JOIN `events` ON `users`.`id` = `events`.`sender_id` WHERE `receiver_id` = ?';
     const [notification] = await connection.execute(mysQuery, [my_id]);
     console.log(notification);
     
@@ -33,7 +33,7 @@ router.get('/', async(req, res) => {
                 "id": notification[i].id,
                 "type": notification[i].type,
                 "is_read": notification[i].is_readname,
-                "image": "https://schoolvoyage.ga/images/123498.png",
+                "image": notification[i].picture,
                 "created_at": notification[i].created_at,
                 "summary": `${notification[i].name}邀請你成為好友`
             };
