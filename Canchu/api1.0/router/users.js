@@ -6,7 +6,7 @@ const multer = require('multer');
 
 
 // create the connection nod to database
-const connection = require('../models/mysql').connection;
+const connectionPromise = require('../models/mysql').connectionPromise;
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -21,6 +21,8 @@ const upload = multer({ storage: storage })
 
 
 router.post('/signup', async(req, res) => {
+    console.log(connectionPromise);
+    const connection = await connectionPromise;
     console.log(connection);
     try{
         const { name, email, password } = req.body;
