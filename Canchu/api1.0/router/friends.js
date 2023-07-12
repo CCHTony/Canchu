@@ -3,7 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 
 // create the connection nod to database
-const connection = require('../models/mysql').Connect
+const connection = require('../models/mysql').connection
 
 
 router.post('/:user_id/request', async(req, res) => {
