@@ -225,4 +225,12 @@ router.put('/picture', verifyAccesstoken, upload.single('picture'), async(req, r
 });
 
 
+router.get('/users/search', verifyAccesstoken, async(req, res) => {
+    const connection = await connectionPromise;
+
+    
+    res.json(results);
+});
+
+
 module.exports = router;

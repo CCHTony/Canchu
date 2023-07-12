@@ -23,16 +23,10 @@ router.get('/', verifyAccesstoken, async(req, res) => {
         else{
             summary = 'has accepted your friend request.';
         }
-        if(notification[i].is_read === 0){
-            TOF = false;
-        }
-        else{
-            TOF = true;
-        }
         let temp = {
                 "id": notification[i].events_id,
                 "type": notification[i].type,
-                "is_read": TOF,
+                "is_read": Boolean(notification[i].is_read),
                 "image": notification[i].picture,
                 "created_at": notification[i].formatted_created_at,
                 "summary": `${notification[i].name} ${summary}`
