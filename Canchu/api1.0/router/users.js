@@ -208,7 +208,7 @@ router.put('/profile', verifyAccesstoken, async(req, res) => {
 });
 
 
-router.put('/picture', verifyAccesstoken, upload.single('picture'), async(req, res) => {
+router.put('/picture', upload.single('picture'), verifyAccesstoken, async(req, res) => {
     const connection = await connectionPromise;
     const id = req.decoded.id;
     const picture = req.file;
