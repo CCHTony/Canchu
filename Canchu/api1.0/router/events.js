@@ -29,11 +29,12 @@ router.get('/', async(req, res) => {
     console.log(notification);
     
     for(let i = 0; i < notification.length; i++){
+        let TOF;
         if(notification[i].is_read === 0){
-            let TOF = false
+            let TOF = false;
         }
         else{
-            let TOF = true
+            let TOF = true;
         }
         let temp = {
                 "id": notification[i].id,
