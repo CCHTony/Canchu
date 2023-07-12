@@ -85,6 +85,8 @@ router.post('/:event_id/read', async(req, res) => {
         res.status(400).json({error : 'You do not have this event!'})
         return;
     }
+    mysQuery = 'UPDATE `events` SET `is_read` = TRUE WHERE `id` = ?';
+    const [update] = await connection.execute(mysQuery, [event_id]);
     const result = {
         "data": {
             "event": {
