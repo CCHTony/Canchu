@@ -7,6 +7,7 @@ const connection = require('../models/mysql').connection;
 
 
 router.post('/:user_id/request', async(req, res) => {
+    const connection = await connectionPromise;
     const receiver_id = req.params.user_id;
     let token = req.headers.authorization;
     if(!token){
@@ -63,6 +64,7 @@ router.post('/:user_id/request', async(req, res) => {
 
 
 router.get('/pending', async(req, res) => {
+    const connection = await connectionPromise;
     let token = req.headers.authorization;
     if(!token){
         res.status(401).json({error : 'No token'});
@@ -104,6 +106,7 @@ router.get('/pending', async(req, res) => {
 
 
 router.post('/:friendship_id/agree', async(req, res) => {
+    const connection = await connectionPromise;
     let token = req.headers.authorization;
     const friendship_id = req.params.friendship_id;
     if(!token){
@@ -155,6 +158,7 @@ router.post('/:friendship_id/agree', async(req, res) => {
 
 
 router.delete('/:friendship_id', async(req, res) => {
+    const connection = await connectionPromise;
     let token = req.headers.authorization;
     const friendship_id = req.params.friendship_id;
     if(!token){

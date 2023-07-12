@@ -21,9 +21,7 @@ const upload = multer({ storage: storage })
 
 
 router.post('/signup', async(req, res) => {
-    console.log(connectionPromise);
     const connection = await connectionPromise;
-    console.log(connection);
     try{
         const { name, email, password } = req.body;
         if(!name || !password || !email){
@@ -74,6 +72,7 @@ router.post('/signup', async(req, res) => {
 
 
 router.post('/signin', async(req, res) => {
+    const connection = await connectionPromise;
     try{
         const provider = req.body.provider;
         if(!provider){
@@ -165,6 +164,7 @@ router.post('/signin', async(req, res) => {
 
 
 router.get('/:id/profile', async(req, res) => {
+    const connection = await connectionPromise;
     const userId = Number(req.params.id);
     let token = req.headers.authorization;
     if(!token){
@@ -204,6 +204,7 @@ router.get('/:id/profile', async(req, res) => {
 
 
 router.put('/profile', async(req, res) => {
+    const connection = await connectionPromise;
     let token = req.headers.authorization;
     if(!token){
         res.status(401).json({error : 'No token'});
@@ -234,6 +235,7 @@ router.put('/profile', async(req, res) => {
 
 
 router.put('/picture', upload.single('picture'), async(req, res) => {
+    const connection = await connectionPromise;
     let token = req.headers.authorization;
     if(!token){
         res.status(401).json({error : 'No token'});
