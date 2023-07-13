@@ -15,7 +15,6 @@ router.get('/', verifyAccesstoken, async(req, res) => {
     const [notification] = await connection.execute(mysQuery, [my_id]);
     console.log(notification);
     for(let i = 0; i < notification.length; i++){
-        let TOF;
         let summary = '';
         if(notification[i].type === 'friend request'){
             summary = 'invited you to be friends.';
@@ -23,16 +22,10 @@ router.get('/', verifyAccesstoken, async(req, res) => {
         else{
             summary = 'has accepted your friend request.';
         }
-        if(notification[i].is_read === 0){
-            TOF = false;
-        }
-        else{
-            TOF = true;
-        }
         let temp = {
                 "id": notification[i].events_id,
                 "type": notification[i].type,
-                "is_read": TOF,
+                "is_read": Boolean(notification[i].is_read),
                 "image": notification[i].picture,
                 "created_at": notification[i].formatted_created_at,
                 "summary": `${notification[i].name} ${summary}`
