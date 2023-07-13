@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const jwt = require('jsonwebtoken');
+
 
 // create the connection nod to database
 const connectionPromise = require('../models/mysql').connectionPromise;
