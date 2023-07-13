@@ -270,6 +270,7 @@ router.get('/search', verifyAccesstoken, async(req, res) => {
             "users": result
         }
     }
+    console.log(results);
     res.json(results);
 });
 
