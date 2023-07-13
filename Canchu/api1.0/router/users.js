@@ -238,7 +238,7 @@ router.get('/search', verifyAccesstoken, async(req, res) => {
     let result = [];
     for(let i = 0; i < search_result.length; i++){
         let friendship = null;
-        if(search_result[i].is_friend === 1){
+        if(search_result[i].is_friend === 1 && (search_result[i].sender_id === my_id || search_result[i].receiver_id === my_id)){
             friendship = {
                 "id": search_result[i].friendship_id,
                 "status": "friend"
