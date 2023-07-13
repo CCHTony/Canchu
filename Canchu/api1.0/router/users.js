@@ -229,6 +229,7 @@ router.get('/search', verifyAccesstoken, async(req, res) => {
     const connection = await connectionPromise;
     const my_id = req.decoded.id;
     const keyword = req.query.keyword;
+    console.log(req.query);
     
     let mysQuery = ` SELECT users.id AS user_id, name, picture, friendship.id AS friendship_id, is_friend, sender_id, receiver_id FROM users LEFT JOIN friendship ON users.id = friendship.sender_id OR users.id = friendship.receiver_id WHERE name LIKE '%${keyword}%'`;
     const [search_result] = await connection.execute(mysQuery);
