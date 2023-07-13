@@ -231,9 +231,9 @@ router.get('/search', verifyAccesstoken, async(req, res) => {
     const keyword = req.query.keyword;
     
     console.log(keyword);
-    let mysQuery = `SELECT users.id AS user_id, name, picture, friendship.id AS friendship_id, is_friend, sender_id, receiver_id FROM users LEFT JOIN friendship ON users.id = friendship.sender_id OR users.id = friendship.receiver_id WHERE name LIKE '%?%'`;
+    let mysQuery = `SELECT users.id AS user_id, name, picture, friendship.id AS friendship_id, is_friend, sender_id, receiver_id FROM users LEFT JOIN friendship ON users.id = friendship.sender_id OR users.id = friendship.receiver_id WHERE name LIKE '%${keyword}%'`;
     console.log(mysQuery);
-    const [search_result] = await connection.execute(mysQuery, [keyword]);
+    const [search_result] = await connection.execute(mysQuery);
     console.log(search_result);
     
     let result = [];
