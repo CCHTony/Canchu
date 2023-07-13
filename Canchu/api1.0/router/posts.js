@@ -12,6 +12,7 @@ router.post('/', verifyAccesstoken, async(req, res) => {
 
     let mysQuery = 'INSERT INTO posts (`poster_id`, `created_at`, `context`, `like_count`, `comment_count`) VALUES (?, NOW(), ?, ?, ?)';
     const [post] = await connection.execute(mysQuery, [my_id, context, 0, 0]);
+    console.log(post);
     const results = {
         "data": {
             "post": {
