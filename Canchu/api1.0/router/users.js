@@ -234,6 +234,7 @@ router.get('/search', verifyAccesstoken, async(req, res) => {
     const [search_result] = await connection.execute(mysQuery);
     console.log(search_result);
     
+    let results = [];
     for(let i = 0; i < search_result.length; i++){
         let friendship = null;
         if(search_result[i].is_friend === true){
@@ -262,7 +263,7 @@ router.get('/search', verifyAccesstoken, async(req, res) => {
             "picture": search_result[i].picture,
             "friendship": friendship
         };
-        notification_result.push(temp);
+        results.push(temp);
     }
     res.json(results);
 });
