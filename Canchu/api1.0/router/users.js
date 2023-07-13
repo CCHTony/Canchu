@@ -260,7 +260,7 @@ router.get('/search', verifyAccesstoken, async(req, res) => {
                 }
             }
         }
-        if(i === search_result.length){
+        if(i === search_result.length-1){
             temp = {
                 "id": search_result[i].id,
                 "name": search_result[i].name,
