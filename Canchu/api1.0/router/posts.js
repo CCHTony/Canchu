@@ -32,7 +32,7 @@ router.put('/:id', verifyAccesstoken, async(req, res) => {
     const context = req.body.context;
 
     let mysQuery = 'UPDATE `posts` set `context` = ? where `id` = ?';
-    const [update] = await connection.execute(mysQuery, [url, post_id]);
+    const [update] = await connection.execute(mysQuery, [context, post_id]);
     console.log(update);
     const results = {
         "data": {
