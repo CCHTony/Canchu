@@ -18,7 +18,7 @@ router.get('/', verifyAccesstoken, async(req, res) => {
     let my_friends = []
     for(let i = 0; i < friends.length; i++){
         let temp = {
-            "id": friends[i].id,
+            "id": friends[i].user_id,
             "name": friends[i].name,
             "picture": friends[i].picture,
             "friendship": {
