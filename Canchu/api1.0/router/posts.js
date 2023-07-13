@@ -5,6 +5,7 @@ const router = express.Router();
 const connectionPromise = require('../models/mysql').connectionPromise;
 const verifyAccesstoken = require('../models/function').verifyAccesstoken;
 
+
 router.post('/', verifyAccesstoken, async(req, res) => {
     const connection = await connectionPromise;
     const my_id = req.decoded.id;
@@ -22,5 +23,26 @@ router.post('/', verifyAccesstoken, async(req, res) => {
     }
     res.json(results);
 });
+
+
+router.put('/:id', verifyAccesstoken, async(req, res) => {
+    const connection = await connectionPromise;
+    const post_id = req.params.id;
+    const my_id = req.decoded.id;
+    const context = req.body.context;
+
+    let mysQuery = 'UPDATE `posts` set `context` = ? where `id` = ?';
+    const [update] = await connection.execute(mysQuery, [url, post_id]);
+    console.log(update);
+    const results = {
+        "data": {
+            "post": {
+                "id": update.id
+            }
+        }
+    }
+    res.json(results);
+});
+
 
 module.exports = router;
