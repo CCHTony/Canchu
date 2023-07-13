@@ -21,3 +21,5 @@ router.post('/', verifyAccesstoken, async(req, res) => {
     }
     res.json(results);
 });
+
+module.exports = router;
