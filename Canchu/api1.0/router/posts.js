@@ -37,7 +37,7 @@ router.put('/:id', verifyAccesstoken, async(req, res) => {
     const results = {
         "data": {
             "post": {
-                "id": update.id
+                "id": post_id
             }
         }
     }
