@@ -227,8 +227,43 @@ router.put('/picture', verifyAccesstoken, upload.single('picture'), async(req, r
 
 router.get('/users/search', verifyAccesstoken, async(req, res) => {
     const connection = await connectionPromise;
-
+    const my_id = req.decoded.id;
+    const keyword = req.query.keyword;
     
+    let mysQuery = ` SELECT users.id AS user_id, name, picture, friendship.id AS friendship_id, is_friend, sender_id, receiver_id FROM users LEFT JOIN friendship ON users.id = friendship.sender_id OR users.id = friendship.receiver_id WHERE name LIKE '%${keyword}%'`;
+    const [search_result] = await connection.execute(mysQuery);
+    console.log(search_result);
+    
+    for(let i = 0; i < notification.length; i++){
+        let friendship = null;
+        if(search_result[i].is_friend === true){
+            friendship = {
+                "id": search_result[i].friendship_id,
+                "status": "friend"
+            }
+        }
+        else if(search_result[i].is_friend === false){
+            if(search_result[i].sender_id === my_id){
+                friendship = {
+                    "id": search_result[i].friendship_id,
+                    "status": "requested"
+                };
+            }
+            else{
+                friendship = {
+                    "id": search_result[i].friendship_id,
+                    "status": "pending"
+                };
+            }
+        }
+        let temp = {
+            "id": search_result[i].id,
+            "name": search_result[i].name,
+            "picture": search_result[i].picture,
+            "friendship": friendship
+        };
+        notification_result.push(temp);
+    }
     res.json(results);
 });
 

@@ -15,7 +15,6 @@ router.get('/', verifyAccesstoken, async(req, res) => {
     const [notification] = await connection.execute(mysQuery, [my_id]);
     console.log(notification);
     for(let i = 0; i < notification.length; i++){
-        let TOF;
         let summary = '';
         if(notification[i].type === 'friend request'){
             summary = 'invited you to be friends.';
