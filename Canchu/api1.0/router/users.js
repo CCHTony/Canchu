@@ -225,7 +225,7 @@ router.put('/picture', verifyAccesstoken, upload.single('picture'), async(req, r
 });
 
 
-router.get('/users/search', verifyAccesstoken, async(req, res) => {
+router.get('/search', verifyAccesstoken, async(req, res) => {
     const connection = await connectionPromise;
     const my_id = req.decoded.id;
     const keyword = req.query.keyword;
