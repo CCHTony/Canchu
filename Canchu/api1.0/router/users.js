@@ -290,6 +290,7 @@ router.get('/search', verifyAccesstoken, async(req, res) => {
             }
         }
     }
+    console.log(result.length);
     const results = {
         "data": {
             "users": result
