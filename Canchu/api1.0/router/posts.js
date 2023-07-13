@@ -16,7 +16,7 @@ router.post('/', verifyAccesstoken, async(req, res) => {
     const results = {
         "data": {
             "post": {
-                "id": post[0].insertId
+                "id": post.insertId
             }
         }
     }
