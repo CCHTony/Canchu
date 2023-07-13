@@ -260,13 +260,18 @@ router.get('/search', verifyAccesstoken, async(req, res) => {
                 }
             }
         }
-        let temp = {
-            "id": search_result[i].id,
-            "name": search_result[i].name,
-            "picture": search_result[i].picture,
-            "friendship": friendship
-        };
-        result.push(temp);
+        if(search_result[i].user_id === search_result[i+1].user_id && friendship === null){
+            continue;
+        }
+        else{
+            let temp = {
+                "id": search_result[i].id,
+                "name": search_result[i].name,
+                "picture": search_result[i].picture,
+                "friendship": friendship
+            };
+            result.push(temp);
+        }
     }
     const results = {
         "data": {
