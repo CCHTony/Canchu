@@ -7,6 +7,36 @@ const connectionPromise = require('../models/mysql').connectionPromise;
 const verifyAccesstoken = require('../models/function').verifyAccesstoken;
 
 
+router.get('/', verifyAccesstoken, async(req, res) => {
+    const connection = await connectionPromise;
+    const my_id = req.decoded.id;
+
+    let mysQuery = 'SELECT `users`.`id` AS `user_id`, `name`, `picture`, `friendship`.`id` AS `friendship_id` FROM `users` JOIN `friendship` ON `users`.`id` = `sender_id` OR `users`.`id` = `receiver_id` WHERE `is_friend` = true AND (`receiver_id` = ? OR sender_id = ?) AND `users`.`id` != ?';
+    const [friends] = await connection.execute(mysQuery, [my_id, my_id, my_id]);
+    console.log(friends)
+
+    let my_friends = []
+    for(let i = 0; i < friends.length; i++){
+        let temp = {
+            "id": friends[i].id,
+            "name": friends[i].name,
+            "picture": friends[i].picture,
+            "friendship": {
+                "id": friends[i].friendship_id,
+                "status": "friend"
+            }
+        }
+        my_friends.push(temp);
+    }
+    const results = {
+        "data": {
+            "users": my_friends
+        }
+    }
+    res.json(results);
+});
+
+
 router.post('/:user_id/request', verifyAccesstoken, async(req, res) => {
     const connection = await connectionPromise;
     const receiver_id = req.params.user_id;
@@ -153,5 +183,6 @@ router.delete('/:friendship_id', verifyAccesstoken, async(req, res) => {
     }
     res.status(400).json({error : 'You cannot delete a request sent by someone else.'})
 });
+
 
 module.exports = router;
