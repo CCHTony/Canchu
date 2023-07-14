@@ -89,7 +89,7 @@ router.post('/:id/comment', verifyAccesstoken, async(req, res) => {
     const my_id = req.decoded.id;
     const content = req.body.content;
 
-    let mysQuery = 'INSERT INTO `comments` (`post_id`, `user_id`, `created_at`, `context`) VALUES (?, ?, NOW(), )';
+    let mysQuery = 'INSERT INTO `comments` (`post_id`, `user_id`, `created_at`, `content`) VALUES (?, ?, NOW(), ?)';
     const [comment] = await connection.execute(mysQuery, [post_id, my_id, content]);
     console.log(comment);
     const results = {
