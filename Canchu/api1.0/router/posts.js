@@ -112,22 +112,24 @@ router.get('/:id', verifyAccesstoken, async (req, res) => {
 
 	// Get post details
 	let postQuery =
-		`
-		SELECT 
-			posts.id AS postId,
-			DATE_FORMAT(CONVERT_TZ(posts.created_at, '+00:00', '+08:00'), '%Y-%m-%d %H:%i:%s') AS created_at,
-			posts.context,
-			users.id AS user_id,
-			users.name,
-			users.picture,
-			COUNT(DISTINCT likes.id) AS like_count, COUNT(DISTINCT comments.id) AS comment_count 
-		FROM posts 
-		LEFT JOIN likes ON likes.post_id = posts.id 
-		LEFT JOIN comments ON comments.post_id = posts.id 
-		INNER JOIN users ON posts.poster_id = users.id 
-		WHERE posts.id = ? 
-		GROUP BY posts.id
-		`;
+	`
+	SELECT
+		posts.id AS postId,
+		DATE_FORMAT(CONVERT_TZ(posts.created_at, '+00:00', '+08:00'), '%Y-%m-%d %H:%i:%s') AS created_at,
+		posts.context,
+		users.id AS user_id,
+		users.name,
+		users.picture,
+		COUNT(DISTINCT likes.id) AS like_count,
+		COUNT(DISTINCT comments.id) AS comment_count,
+		(SELECT COUNT(*) FROM likes WHERE post_id = 4 AND user_id = 35) AS is_liked
+	FROM posts
+	LEFT JOIN likes ON likes.post_id = posts.id
+	LEFT JOIN comments ON comments.post_id = posts.id
+	INNER JOIN users ON posts.poster_id = users.id
+	WHERE posts.id = 4
+	GROUP BY posts.id;
+	`;
 	const post = (await connection.execute(postQuery, [post_id]))[0][0];
 	console.log(post);
 	if (!post) {
@@ -135,14 +137,7 @@ router.get('/:id', verifyAccesstoken, async (req, res) => {
 	}
 
   // Check if the post is liked by the user
-	let isLikedQuery = 
-	`
-	SELECT COUNT(*) AS is_liked
-	FROM likes
-	WHERE post_id = ? AND user_id = ?
-	`;
-	const [likeResults] = await connection.execute(isLikedQuery, [post_id, my_id]);
-	const isLiked = likeResults[0].is_liked === 1;
+	const isLiked = post.is_liked === 1;
 
 	// Get comments for the post
 	let commentsQuery =
