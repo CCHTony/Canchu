@@ -124,10 +124,11 @@ router.get('/:id', verifyAccesstoken, async(req, res) => {
         LEFT JOIN likes ON likes.post_id = posts.id
         LEFT JOIN comments ON comments.post_id = posts.id
         INNER JOIN users ON posts.poster_id = users.id
-        WHERE posts.id = ?
-        GROUP BY posts.id
+        WHERE posts.id = ` + '?' +
+    `   GROUP BY posts.id
     `;
-    const post = await connection.execute(mysQuery, [post_id, my_id]);
+    console.log(mysQuery);
+    const post = await connection.execute(mysQuery, [post_id])[0];
     console.log(post);
     const results = {
         "data": {
