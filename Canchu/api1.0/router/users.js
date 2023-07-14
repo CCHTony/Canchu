@@ -228,10 +228,10 @@ router.put('/picture', verifyAccesstoken, upload.single('picture'), async (req, 
 router.get('/search', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
 	const my_id = req.decoded.id;
-	const keyword = `'%${req.query.keyword}%'`;
+	const keyword = `%${req.query.keyword}%`;
 
 	console.log(keyword);
-	let mysQuery = 
+	let searchQuery = 
 	`
 		SELECT 
 			users.id AS user_id, 
@@ -245,7 +245,8 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 		ON users.id = friendship.sender_id OR users.id = friendship.receiver_id 
 		WHERE name LIKE ?
 		`;
-	const [search_result] = await connection.execute(mysQuery, [keyword]);
+	console.log(searchQuery);
+	const [search_result] = await connection.execute(searchQuery, [keyword]);
 	console.log(search_result);
 
 	let result = [];
