@@ -122,15 +122,15 @@ router.get('/:id', verifyAccesstoken, async (req, res) => {
 		users.picture,
 		COUNT(DISTINCT likes.id) AS like_count,
 		COUNT(DISTINCT comments.id) AS comment_count,
-		(SELECT COUNT(*) FROM likes WHERE post_id = 4 AND user_id = 35) AS is_liked
+		(SELECT COUNT(*) FROM likes WHERE post_id = ? AND user_id = ?) AS is_liked
 	FROM posts
 	LEFT JOIN likes ON likes.post_id = posts.id
 	LEFT JOIN comments ON comments.post_id = posts.id
 	INNER JOIN users ON posts.poster_id = users.id
-	WHERE posts.id = 4
+	WHERE posts.id = ?
 	GROUP BY posts.id;
 	`;
-	const post = (await connection.execute(postQuery, [post_id]))[0][0];
+	const post = (await connection.execute(postQuery, [post_id, my_id, post_id]))[0][0];
 	console.log(post);
 	if (!post) {
 		return res.status(404).json({ error: 'Post not found' });
