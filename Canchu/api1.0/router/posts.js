@@ -138,7 +138,7 @@ router.get('/:id', verifyAccesstoken, async (req, res) => {
 	LEFT JOIN comments ON comments.post_id = posts.id
 	INNER JOIN users ON posts.poster_id = users.id
 	WHERE posts.id = ?
-	GROUP BY posts.id;
+	GROUP BY posts.id
 	`;
 	const post = (await connection.execute(postQuery, [post_id, my_id, post_id]))[0][0];
 	console.log(post);

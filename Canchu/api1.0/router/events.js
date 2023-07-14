@@ -45,23 +45,22 @@ router.post('/:event_id/read', verifyAccesstoken, async (req, res) => {
 	const event_id = req.params.event_id;
 	const my_id = req.decoded.id;
 
-	let mysQuery = 'SELECT `id` FROM `events` WHERE `receiver_id` = ? AND `id` = ?';
-	const [event] = await connection.execute(mysQuery, [my_id, event_id]);
+	const checkEventQuery = 'SELECT id FROM events WHERE receiver_id = ? AND id = ?';
+	const [event] = await connection.execute(checkEventQuery, [my_id, event_id]);
 	if (event.length === 0) {
-		res.status(400).json({ error: 'You do not have this event!' })
-		return;
+		return res.status(400).json({ error: 'You do not have this event!' });
 	}
-	mysQuery = 'UPDATE `events` SET `is_read` = TRUE WHERE `id` = ?';
-	const [update] = await connection.execute(mysQuery, [event_id]);
+	const readQuery = 'UPDATE events SET is_read = TRUE WHERE id = ?';
+	const [update] = await connection.execute(readQuery, [event_id]);
 	console.log(event);
-	const result = {
+	const response = {
 		"data": {
 			"event": {
 				"id": event_id
 			}
 		}
 	}
-	res.json(result);
+	res.json(response);
 });
 
 

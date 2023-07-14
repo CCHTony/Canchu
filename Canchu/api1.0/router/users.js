@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const multer = require('multer');
 
 
@@ -26,32 +27,36 @@ router.post('/signup', async (req, res) => {
 	try {
 		const { name, email, password } = req.body;
 		if (!name || !password || !email) {
-			res.status(400).json({ error: 'All fields (name, email, password) must be entered.' });
-			return;
+			return res.status(400).json({ error: 'All fields (name, email, password) must be entered.' });
 		}
+
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailRegex.test(email)) {
-			res.status(400).json({ error: 'Invalid email address.' });
-			return;
+			return res.status(400).json({ error: 'Invalid email address.' });
 		}
-		let mysQuery = 'SELECT `email` FROM `users` WHERE `email` = ?';
-		const [rows] = await connection.execute(mysQuery, [email]);
+
+		let userQuery = 'SELECT email FROM users WHERE email = ?';
+		const [rows] = await connection.execute(userQuery, [email]);
 		if (rows.length != 0) {
-			res.status(403).json({ error: 'It should not be possible to register with a duplicate email.' });
-			return;
+			return res.status(403).json({ error: 'It should not be possible to register with a duplicate email.' });
 		}
-		mysQuery = 'INSERT INTO `users`(`name`, `email`, `password`, `picture`, `provider`) VALUES(?,?,?,?,?)';
-		const [results] = await connection.execute(mysQuery, [name, email, password, null, 'native']);
+
+		// 使用 crypto 对密码进行加密
+		const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
+
+		signupQuery = 'INSERT INTO users(name, email, password, picture, provider) VALUES(?,?,?,?,?)';
+		const [results] = await connection.execute(signinQuery, [name, email, hashedPassword, null, 'native']);
 		let id = results.insertId;
-		let payload = {
+
+		const payload = {
 			"id": id,
 			"name": name,
 			"email": email,
-			"password": password,
 			"provider": 'native',
 			"picture": null
 		};
-		let result = {
+
+		const response = {
 			'data': {
 				'access_token': jwt.sign(payload, process.env.SECRETKEY, { expiresIn: '1 day' }),
 				"user": {
@@ -63,7 +68,7 @@ router.post('/signup', async (req, res) => {
 				}
 			}
 		};
-		res.json(result);
+		res.json(response);
 	}
 	catch (err) {
 		res.status(500).json({ error: "Server Error." });
@@ -77,27 +82,28 @@ router.post('/signin', async (req, res) => {
 	try {
 		const provider = req.body.provider;
 		if (!provider) {
-			res.status(400).json({ error: 'All fields must be entered.' });
-			return;
+			return res.status(400).json({ error: 'All fields must be entered.' });
 		}
+
 		if (provider === 'native') {
 			const email = req.body.email;
 			const password = req.body.password;
+
 			if (!email || !password) {
-				res.status(400).json({ error: 'All fields must be entered.' });
-				return;
+				return res.status(400).json({ error: 'All fields must be entered.' });
 			}
-			const mysqlQuery = 'SELECT * FROM `users` WHERE `email` = ?';
-			const [rows] = await connection.execute(mysqlQuery, [email]);
-			if (rows.length === 0) {
-				res.status(403).json({ error: 'User Not Found' })
-				return;
+
+			const signinQuery = 'SELECT * FROM users WHERE email = ?';
+			const [is_exist] = await connection.execute(signinQuery, [email]);
+			if (is_exist.length === 0) {
+				return res.status(403).json({ error: 'User Not Found' })
 			}
-			const user = rows[0];
+
+			const user = is_exist[0];
 			const PASSWORD = user.password;
-			if (PASSWORD !== password) {
-				res.status(403).json({ error: 'Wrong Password' });
-				return;
+			const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
+			if (PASSWORD !== hashedPassword) {
+				return res.status(403).json({ error: 'Wrong Password' });
 			}
 			const id = user.id;
 			const name = user.name;
@@ -110,7 +116,7 @@ router.post('/signin', async (req, res) => {
 				"provider": 'native',
 				"picture": picture
 			};
-			const result = {
+			const response = {
 				'data': {
 					'access_token': jwt.sign(payload, process.env.SECRETKEY, { expiresIn: '1 day' }),
 					"user": {
@@ -122,7 +128,7 @@ router.post('/signin', async (req, res) => {
 					}
 				}
 			};
-			res.json(result);
+			res.json(response);
 		}
 		else if (provider === 'facebook') {
 			const access_token = req.body.access_token;
@@ -130,16 +136,15 @@ router.post('/signin', async (req, res) => {
 			const user = await (await fetch(url)).json();
 			const { name, email } = user;
 			const picture = user.picture.data.url;
-			let mysQuery = 'SELECT `email` FROM `users` WHERE `email` = ?';
-			const [rows] = await connection.execute(mysQuery, [email]);
-			if (rows.length != 0) {
-				res.status(403).json({ error: 'This account is signup by native, please login by native' });
-				return;
+			let userQuery = 'SELECT email FROM users WHERE email = ?';
+			const [is_signup] = await connection.execute(userQuery, [email]);
+			if (is_signup.length != 0) {
+				return res.status(403).json({ error: 'This account is signup by native, please login by native' });
 			}
-			mysQuery = 'INSERT INTO `users`(`name`, `email`, `password`, `picture`, `provider`) VALUES(?,?,?,?,?)';
-			const [results] = await connection.execute(mysQuery, [name, email, '', picture, 'facebook']);
-			let id = results.insertId;
-			const result = {
+			let facebookQuery = 'INSERT INTO users(name, email, password, picture, provider) VALUES(?,?,?,?,?)';
+			const [signup] = await connection.execute(facebookQuery, [name, email, '', picture, 'facebook']);
+			let id = signup.insertId;
+			const response = {
 				'data': {
 					'access_token': access_token,
 					"user": {
@@ -151,7 +156,7 @@ router.post('/signin', async (req, res) => {
 					}
 				}
 			};
-			res.json(result);
+			res.json(response);
 		}
 		else {
 			res.status(403).json({ error: 'Wrong provider' });
@@ -168,10 +173,10 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
 	const userId = Number(req.params.id);
 
-	const mysqlQuery = 'SELECT * FROM `users` WHERE `id` = ?';
+	const mysqlQuery = 'SELECT * FROM users WHERE id = ?';
 	const [rows] = await connection.execute(mysqlQuery, [userId]);
 	console.log(rows[0]);
-	const results = {
+	const response = {
 		"data": {
 			"user": {
 				"id": userId,
@@ -187,7 +192,7 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 			}
 		}
 	};
-	res.json(results);
+	res.json(response);
 });
 
 
@@ -197,14 +202,14 @@ router.put('/profile', verifyAccesstoken, async (req, res) => {
 	const { name, introduction, tags } = req.body;
 	let mysQuery = 'update users set `name` = ?, `intro` = ?, `tags` = ? where `id` = ?';
 	const [rows] = await connection.execute(mysQuery, [name, introduction, tags, id]);
-	const result = {
+	const response = {
 		"data": {
 			"user": {
 				"id": id
 			}
 		}
 	};
-	res.json(result);
+	res.json(response);
 });
 
 
@@ -214,14 +219,14 @@ router.put('/picture', verifyAccesstoken, upload.single('picture'), async (req, 
 	const picture = req.file;
 
 	const url = `http://52.64.240.159/${picture.filename}`
-	result = {
+	response = {
 		"data": {
 			"picture": url
 		}
 	}
 	let mysQuery = 'update users set `picture` = ? where `id` = ?';
 	const [rows] = await connection.execute(mysQuery, [url, id]);
-	res.json(result);
+	res.json(response);
 });
 
 

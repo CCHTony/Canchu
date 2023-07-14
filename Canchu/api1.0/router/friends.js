@@ -11,7 +11,7 @@ router.get('/', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
 	const my_id = req.decoded.id;
 
-	let mysQuery =
+	let friendQuery =
 		`
 			SELECT 
 				users.id AS user_id, 
@@ -22,7 +22,7 @@ router.get('/', verifyAccesstoken, async (req, res) => {
 			ON users.id = friendship.sender_id OR users.id = friendshipreceiver_id 
 			WHERE friendship.is_friend = true AND (friendship.receiver_id = ? OR friendship.sender_id = ?) AND users.id != ?
     `;
-	const [friends] = await connection.execute(mysQuery, [my_id, my_id, my_id]);
+	const [friends] = await connection.execute(friendQuery, [my_id, my_id, my_id]);
 	console.log(friends)
 
 	let my_friends = []
@@ -38,12 +38,12 @@ router.get('/', verifyAccesstoken, async (req, res) => {
 		}
 		my_friends.push(temp);
 	}
-	const results = {
+	const response = {
 		"data": {
 			"users": my_friends
 		}
 	}
-	res.json(results);
+	res.json(response);
 });
 
 
@@ -52,13 +52,23 @@ router.post('/:user_id/request', verifyAccesstoken, async (req, res) => {
 	const receiver_id = req.params.user_id;
 	const sender_id = req.decoded.id
 
-	let mysQuery = 'SELECT `id` FROM `users` WHERE `id` = ?';
-	const [is_receiver_exist] = await connection.execute(mysQuery, [receiver_id]);
+	let userQuery = 'SELECT id FROM users WHERE id = ?';
+	const [is_receiver_exist] = await connection.execute(userQuery, [receiver_id]);
 	if (!is_receiver_exist.length) {
-		res.status(400).json({ error: 'This user is not exist.' });
-		return;
+		return res.status(400).json({ error: 'This user is not exist.' });
 	}
-	mysQuery = 'SELECT `is_friend` FROM `friendship` WHERE `sender_id` = ? AND `receiver_id` = ?';
+
+	let checkRelationQuery = 'SELECT is_friend FROM friendship WHERE (sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)';
+  const [friendship] = await connection.execute(checkRelationQuery, [sender_id, receiver_id, receiver_id, sender_id]);
+  if (friendship.length) {
+    if (friendship[0].is_friend) {
+      return res.status(400).json({ error: 'You are already friends.' });
+    } else {
+      return res.status(400).json({ error: 'The request already exists.' });
+    }
+  }
+
+	/*let mysQuery = 'SELECT is_friend FROM friendship WHERE sender_id = ? AND receiver_id = ?';
 	let [friendship] = await connection.execute(mysQuery, [sender_id, receiver_id]);
 	if (friendship.length) {
 		if (friendship[0].is_friend) {
@@ -77,20 +87,21 @@ router.post('/:user_id/request', verifyAccesstoken, async (req, res) => {
 		}
 		res.status(400).json({ error: 'This user has already sent you a friend request!' });
 		return;
-	}
-	mysQuery = 'INSERT INTO `friendship`(`sender_id`, `receiver_id`, `is_friend`) VALUES(?,?,?)';
-	const [rows] = await connection.execute(mysQuery, [sender_id, receiver_id, false]);
+	}*/
+
+	const friendQuery = 'INSERT INTO friendship(sender_id, receiver_id, is_friend) VALUES(?,?,?)';
+	const [makeFriend] = await connection.execute(friendQuery, [sender_id, receiver_id, false]);
 	const type = 'friend request'
-	mysQuery = 'INSERT INTO `events`(`sender_id`, `receiver_id`, `type`, `is_read`, `created_at`) VALUES(?,?,?,?,NOW())';
-	const [event] = await connection.execute(mysQuery, [sender_id, receiver_id, type, false]);
-	result = {
+	const eventQuery = 'INSERT INTO events(sender_id, receiver_id, type, is_read, created_at) VALUES(?,?,?,?,NOW())';
+	const [event] = await connection.execute(eventQuery, [sender_id, receiver_id, type, false]);
+	response = {
 		"data": {
 			"friendship": {
-				"id": rows.insertId
+				"id": makeFriend.insertId
 			}
 		}
 	}
-	res.json(result);
+	res.json(response);
 });
 
 
@@ -124,12 +135,12 @@ router.get('/pending', verifyAccesstoken, async (req, res) => {
 		}
 		user_result.push(temp);
 	}
-	const result = {
+	const response = {
 		"data": {
 			"users": user_result
 		}
 	};
-	res.json(result);
+	res.json(response);
 });
 
 
@@ -138,40 +149,42 @@ router.post('/:friendship_id/agree', verifyAccesstoken, async (req, res) => {
 	const friendship_id = req.params.friendship_id;
 	const my_id = req.decoded.id;
 
-	let mysQuery = 'SELECT `is_friend`, `receiver_id`, `sender_id` FROM `friendship` WHERE `id` = ?';
-	const [request_exist] = await connection.execute(mysQuery, [friendship_id]);
+	const requestQuery = 'SELECT is_friend, receiver_id, sender_id FROM friendship WHERE id = ?';
+	const [request_exist] = await connection.execute(requestQuery, [friendship_id]);
 	if (!request_exist.length) {
-		res.status(400).json({ error: 'Request does not exist.' });
-		return;
+		return res.status(400).json({ error: 'Request does not exist.' });
 	}
+
 	const is_friend = request_exist[0].is_friend;
 	const receiver_id = request_exist[0].receiver_id;
 	const sender_id = request_exist[0].sender_id;
+
 	if (is_friend) {
-		res.status(400).json({ error: 'You are already friends.' });
-		return;
+		return res.status(400).json({ error: 'You are already friends.' });
 	}
 	if (my_id !== receiver_id) {
-		res.status(400).json({ error: 'Sender cannot agree the request' });
-		return;
+		return res.status(400).json({ error: 'Sender cannot agree the request' });
 	}
+
 	try {
-		mysQuery = 'UPDATE `friendship` SET `is_friend` = TRUE WHERE `id` = ?';
-		const [agreement] = await connection.execute(mysQuery, [friendship_id]);
-		mysQuery = 'INSERT INTO `events`(`sender_id`, `receiver_id`, `type`, `is_read`, `created_at`) VALUES(?,?,?,?,NOW())';
-		const [event] = await connection.execute(mysQuery, [my_id, sender_id, 'accepts friend request', false]);
+		const updateQuery = 'UPDATE friendship SET is_friend = TRUE WHERE id = ?';
+		const [agreement] = await connection.execute(updateQuery, [friendship_id]);
+
+		const eventQuery = 'INSERT INTO events(sender_id, receiver_id, type, is_read, created_at) VALUES(?,?,?,?,NOW())';
+		const [event] = await connection.execute(eventQuery, [my_id, sender_id, 'accepts friend request', false]);
 	} catch (err) {
 		res.status(500).json({ error: 'Server error' })
 		console.log(err);
 	}
-	const result = {
+
+	const response = {
 		"data": {
 			"friendship": {
 				"id": friendship_id
 			}
 		}
 	}
-	res.json(result);
+	res.json(response);
 });
 
 
@@ -180,27 +193,27 @@ router.delete('/:friendship_id', verifyAccesstoken, async (req, res) => {
 	const friendship_id = req.params.friendship_id;
 	const my_id = req.decoded.id;
 
-	let mysQuery = 'SELECT `is_friend`, `sender_id`, `receiver_id` FROM `friendship` WHERE `id` = ?';
-	const [relation_exist] = await connection.execute(mysQuery, [friendship_id]);
+	const chechFriendQuery = 'SELECT is_friend, sender_id, receiver_id FROM friendship WHERE id = ?';
+	const [relation_exist] = await connection.execute(chechFriendQuery, [friendship_id]);
 	if (!relation_exist.length) {
-		res.status(400).json({ error: 'Friendship or friendship invitation does not exist.' });
-		return;
+		return res.status(400).json({ error: 'Friendship or friendship invitation does not exist.' });
 	}
+
 	const is_friend = relation_exist[0].is_friend;
 	const sender_id = relation_exist[0].sender_id;
 	if (is_friend || my_id === sender_id) {
-		mysQuery = 'DELETE FROM `friendship` WHERE `id` = ?';
-		const [temp] = await connection.execute(mysQuery, [friendship_id]);
-		const result = {
+		const deleteFriendQuery = 'DELETE FROM friendship WHERE id = ?';
+		const [temp] = await connection.execute(deleteFriendQuery, [friendship_id]);
+		const response = {
 			"data": {
 				"friendship": {
 					"id": friendship_id
 				}
 			}
 		}
-		res.json(result);
-		return;
+		return res.json(response);
 	}
+
 	res.status(400).json({ error: 'You cannot delete a request sent by someone else.' })
 });
 
