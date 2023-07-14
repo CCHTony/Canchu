@@ -114,7 +114,7 @@ router.get('/:id', verifyAccesstoken, async (req, res) => {
 	let postQuery =
 		`
 		SELECT 
-			posts.id AS post_id,
+			posts.id AS postId,
 			DATE_FORMAT(CONVERT_TZ(posts.created_at, '+00:00', '+08:00'), '%Y-%m-%d %H:%i:%s') AS created_at,
 			posts.context,
 			users.id AS user_id,
@@ -175,7 +175,7 @@ router.get('/:id', verifyAccesstoken, async (req, res) => {
 	const response = {
 		data: {
 			post: {
-				id: post.id,
+				id: post.postId,
 				created_at: post.created_at,
 				context: post.context,
 				is_liked: isLiked,
