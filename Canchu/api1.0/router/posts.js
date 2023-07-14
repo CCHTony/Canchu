@@ -110,22 +110,7 @@ router.get('/:id', verifyAccesstoken, async(req, res) => {
     const post_id = req.params.id;
     const my_id = req.decoded.id;
 
-    let mysQuery = 
-        'SELECT ' +
-            'posts.id AS post_id,'+
-            'posts.created_at,' +
-            'posts.context,' +
-            'users.id AS user_id,' + 
-            'users.name,' +
-            'users.picture,' +
-            'COUNT(DISTINCT likes.id) AS like_count, COUNT(DISTINCT comments.id) AS comment_count ' +
-        'FROM posts ' +
-        'LEFT JOIN likes ON likes.post_id = posts.id ' +
-        'LEFT JOIN comments ON comments.post_id = posts.id ' +
-        'INNER JOIN users ON posts.poster_id = users.id ' +
-        'WHERE posts.id = ? ' +
-        'GROUP BY posts.id'
-    ;
+    let mysQuery = 'SELECT posts.id AS post_id,posts.created_at,posts.context,users.id AS user_id,users.name,users.picture,COUNT(DISTINCT likes.id) AS like_count, COUNT(DISTINCT comments.id) AS comment_count FROM posts LEFT JOIN likes ON likes.post_id = posts.id LEFT JOIN comments ON comments.post_id = posts.id INNER JOIN users ON posts.poster_id = users.id WHERE posts.id = ? GROUP BY posts.id';
     console.log(mysQuery);
     const post = await connection.execute(mysQuery, [post_id])[0];
     console.log(post);
