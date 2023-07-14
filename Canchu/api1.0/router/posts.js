@@ -110,55 +110,84 @@ router.get('/:id', verifyAccesstoken, async (req, res) => {
 	const post_id = req.params.id;
 	const my_id = req.decoded.id;
 
-	let mysQuery =
+	// Get post details
+	let postQuery =
 		`
-			SELECT 
-				posts.id AS post_id,
-				DATE_FORMAT(CONVERT_TZ(posts.created_at, '+00:00', '+08:00'), '%Y-%m-%d %H:%i:%s') AS created_at,
-				posts.context,
-				users.id AS user_id,
-				users.name,
-				users.picture,
-				COUNT(DISTINCT likes.id) AS like_count, COUNT(DISTINCT comments.id) AS comment_count 
-			FROM posts 
-			LEFT JOIN likes ON likes.post_id = posts.id 
-			LEFT JOIN comments ON comments.post_id = posts.id 
-			INNER JOIN users ON posts.poster_id = users.id 
-			WHERE posts.id = ? 
-			GROUP BY posts.id
+		SELECT 
+			posts.id AS post_id,
+			DATE_FORMAT(CONVERT_TZ(posts.created_at, '+00:00', '+08:00'), '%Y-%m-%d %H:%i:%s') AS created_at,
+			posts.context,
+			users.id AS user_id,
+			users.name,
+			users.picture,
+			COUNT(DISTINCT likes.id) AS like_count, COUNT(DISTINCT comments.id) AS comment_count 
+		FROM posts 
+		LEFT JOIN likes ON likes.post_id = posts.id 
+		LEFT JOIN comments ON comments.post_id = posts.id 
+		INNER JOIN users ON posts.poster_id = users.id 
+		WHERE posts.id = ? 
+		GROUP BY posts.id
 		`;
-	const post = (await connection.execute(mysQuery, [post_id]))[0][0];
+	const post = (await connection.execute(postQuery, [post_id]))[0][0];
 	console.log(post);
 	if (!post) {
 		return res.status(404).json({ error: 'Post not found' });
 	}
 
+  // Check if the post is liked by the user
+	let isLikedQuery = 
+	`
+	SELECT COUNT(*) AS is_liked
+	FROM likes
+	WHERE post_id = ? AND user_id = ?
+	`;
+	const [likeResults] = await connection.execute(isLikedQuery, [post_id, my_id]);
+	const isLiked = likeResults[0].is_liked === 1;
 
-	const results = {
-		"data": {
-			"post": {
-				"id": post.post_id,
-				"created_at": post.created_at,
-				"context": post.context,
-				"is_liked": true,
-				"like_count": post.like_count,
-				"comment_count": post.comment_count,
-				"picture": post.picture,
-				"name": post.name,
-				"comments": [{
-					"id": 1,
-					"created_at": "2023-04-10 23:21:10",
-					"content": "評論評論評論評論評論評論",
-					"user": {
-						"id": "1",
-						"name": "PJ",
-						"picture": ""
-					}
-				}]
-			}
-		}
-	}
-	res.json(results);
+	// Get comments for the post
+	let commentsQuery =
+	`
+	SELECT 
+		comments.id,
+		DATE_FORMAT(CONVERT_TZ(comments.created_at, '+00:00', '+08:00'), '%Y-%m-%d %H:%i:%s')
+		comments.content,
+		users.id AS user_id,
+		users.name,
+		users.picture
+	FROM comments
+	INNER JOIN users ON comments.user_id = users.id
+	WHERE comments.post_id = ?
+	`;
+	const [commentResults] = await connection.execute(commentsQuery, [post_id]);
+	const comments = commentResults.map((comment) => ({
+		id: comment.id,
+		created_at: comment.created_at,
+		content: comment.content,
+		user: {
+			id: comment.user_id,
+			name: comment.name,
+			picture: comment.picture,
+		},
+	}));
+
+
+	// Build the response object
+	const response = {
+		data: {
+			post: {
+				id: post.id,
+				created_at: post.created_at,
+				context: post.context,
+				is_liked: isLiked,
+				like_count: post.like_count,
+				comment_count: post.comment_count,
+				picture: post.picture,
+				name: post.name,
+				comments: comments,
+			},
+		},
+	};
+	res.json(response);
 });
 
 
