@@ -11,7 +11,17 @@ router.get('/', verifyAccesstoken, async(req, res) => {
     const connection = await connectionPromise;
     const my_id = req.decoded.id;
 
-    let mysQuery = 'SELECT `users`.`id` AS `user_id`, `name`, `picture`, `friendship`.`id` AS `friendship_id` FROM `users` JOIN `friendship` ON `users`.`id` = `sender_id` OR `users`.`id` = `receiver_id` WHERE `is_friend` = true AND (`receiver_id` = ? OR sender_id = ?) AND `users`.`id` != ?';
+    let mysQuery = 
+    `
+        SELECT 
+            users.id AS user_id, 
+            users.name, 
+            users.picture, 
+            friendship.id AS friendship_id 
+        FROM users JOIN friendship 
+        ON users.id = friendship.sender_id OR users.id = friendshipreceiver_id 
+        WHERE friendship.is_friend = true AND (friendship.receiver_id = ? OR friendship.sender_id = ?) AND users.id != ?
+    `;
     const [friends] = await connection.execute(mysQuery, [my_id, my_id, my_id]);
     console.log(friends)
 
@@ -88,7 +98,17 @@ router.get('/pending', verifyAccesstoken, async(req, res) => {
     const connection = await connectionPromise;
     const my_id = req.decoded.id;
 
-    mysQuery = 'SELECT `users`.`id` AS `user_id`, `name`, `picture`, `friendship`.`id` AS `friendship_id` FROM `users` JOIN `friendship` ON `users`.`id` = `sender_id` WHERE `receiver_id` = ? AND `is_friend` = false';
+    mysQuery = 
+    `
+        SELECT 
+            users.id AS user_id, 
+            users.name, 
+            users.picture, 
+            friendship.id AS friendship_id 
+        FROM users JOIN friendship 
+        ON users.id = friendship.sender_id 
+        WHERE friendship.receiver_id = ? AND friendship.is_friend = false
+    `;
     const [pending] = await connection.execute(mysQuery, [my_id]);
     console.log(pending);
     let user_result = [];
