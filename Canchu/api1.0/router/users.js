@@ -228,82 +228,37 @@ router.put('/picture', verifyAccesstoken, upload.single('picture'), async (req, 
 router.get('/search', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
 	const my_id = req.decoded.id;
-	const keyword = `%${req.query.keyword}%`;
+	const keyword = `'%${req.query.keyword}%'`;
 
 	console.log(keyword);
-	let mysQuery = 
-	`
-		SELECT 
-			users.id AS user_id, 
-			users.name, 
-			users.picture, 
-			friendship.id AS friendship_id, 
-			friendship.is_friend, 
-			friendship.sender_id, 
-			friendship.receiver_id 
-		FROM users LEFT JOIN friendship 
-		ON users.id = friendship.sender_id OR users.id = friendship.receiver_id 
-		WHERE name LIKE ?
-	`;
-	const [search_result] = await connection.execute(mysQuery);
+	let searchQuery =
+	 `
+	SELECT
+		users.id AS id,
+		users.name,
+		users.picture,
+		friendship.id AS friendship_id,
+		friendship.is_friend,
+		friendship.sender_id,
+		friendship.receiver_id,
+	FROM users
+	LEFT JOIN (
+		SELECT
+			CASE
+				WHEN sender_id = ? THEN receiver_id
+				WHEN receiver_id = ? THEN sender_id
+			END AS user_id,
+			id,
+			is_friend
+		FROM friendship
+		WHERE sender_id = ? OR receiver_id = ?
+	) AS friendship ON users.id = friendship.user_id
+	WHERE name LIKE ?
+`;
+	const [search_result] = await connection.execute(searchQuery, [my_id, my_id, my_id, my_id, keyword]);
 	console.log(search_result);
 
-	let result = [];
-	for (let i = 0; i < search_result.length; i++) {
-		let friendship = null;
-		if (search_result[i].sender_id === my_id || search_result[i].receiver_id === my_id) {
-			if (search_result[i].is_friend === 1) {
-				friendship = {
-					"id": search_result[i].friendship_id,
-					"status": "friend"
-				}
-			}
-			else if (search_result[i].is_friend === 0) {
-				if (search_result[i].sender_id === my_id) {
-					friendship = {
-						"id": search_result[i].friendship_id,
-						"status": "requested"
-					};
-				}
-				else {
-					friendship = {
-						"id": search_result[i].friendship_id,
-						"status": "pending"
-					};
-				}
-			}
-		}
-		if (i === search_result.length - 1) {
-			temp = {
-				"id": search_result[i].id,
-				"name": search_result[i].name,
-				"picture": search_result[i].picture,
-				"friendship": friendship
-			};
-			result.push(temp);
-		}
-		else {
-			if (search_result[i].user_id === search_result[i + 1].user_id && friendship === null) {
-				continue;
-			}
-			else {
-				let temp = {
-					"id": search_result[i].id,
-					"name": search_result[i].name,
-					"picture": search_result[i].picture,
-					"friendship": friendship
-				};
-				result.push(temp);
-				while (search_result[i].user_id === search_result[i + 1].user_id) {
-					i++;
-					if (i === search_result.length) {
-						break;
-					}
-				}
-			}
-		}
-	}
-	console.log(result.length);
+	
 	const results = {
 		"data": {
 			"users": result

@@ -30,17 +30,21 @@ router.put('/:id', verifyAccesstoken, async (req, res) => {
 	const post_id = req.params.id;
 	const context = req.body.context;
 
-	let mysQuery = 'UPDATE posts set context = ? where id = ?';
+	let mysQuery = 'UPDATE posts set context = ? where id = ? AND poster_id = ? ';
 	const [update] = await connection.execute(mysQuery, [context, post_id]);
 	console.log(update);
-	const results = {
+	if (update.affectedRows === 0) {
+		// Not poster or post does not exist
+		return res.status(403).json({error : 'you are not poster or post does not exist'});
+	}
+	const response = {
 		"data": {
 			"post": {
 				"id": post_id
 			}
 		}
 	}
-	res.json(results);
+	res.json(response);
 });
 
 
@@ -52,14 +56,17 @@ router.post('/:id/like', verifyAccesstoken, async (req, res) => {
 	let likeQuery = 'INSERT IGNORE INTO likes (post_id, user_id, created_at) VALUES (?, ?, NOW())';
 	const [like] = await connection.execute(likeQuery, [post_id, my_id]);
 	console.log(like);
-	const results = {
+	if(like.affectedRows === 0){
+		return res.status(400).json({ error: 'You have already liked it.' });
+	}
+	const response = {
 		"data": {
 			"post": {
 				"id": post_id
 			}
 		}
 	}
-	res.json(results);
+	res.json(response);
 });
 
 
@@ -72,7 +79,7 @@ router.delete('/:id/like', verifyAccesstoken, async (req, res) => {
 	const [like] = await connection.execute(likeQuery, [post_id, my_id]);
 	console.log(like);
 	if(like.affectedRows === 0){
-		return res.status(400).json({ error: 'you do not like this post yet!' });
+		return res.status(400).json({ error: "You haven't liked it yet!" });
 	}
 	const response = {
 		"data": {
@@ -91,10 +98,10 @@ router.post('/:id/comment', verifyAccesstoken, async (req, res) => {
 	const my_id = req.decoded.id;
 	const content = req.body.content;
 
-	let mysQuery = 'INSERT INTO comments (post_id, user_id, created_at, content) VALUES (?, ?, NOW(), ?)';
-	const [comment] = await connection.execute(mysQuery, [post_id, my_id, content]);
+	let postQuery = 'INSERT INTO comments (post_id, user_id, created_at, content) VALUES (?, ?, NOW(), ?)';
+	const [comment] = await connection.execute(postQuery, [post_id, my_id, content]);
 	console.log(comment);
-	const results = {
+	const response = {
 		"data": {
 			"post": {
 				"id": post_id
@@ -104,7 +111,7 @@ router.post('/:id/comment', verifyAccesstoken, async (req, res) => {
 			}
 		}
 	}
-	res.json(results);
+	res.json(response);
 });
 
 
