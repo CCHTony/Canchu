@@ -114,7 +114,7 @@ router.get('/:id', verifyAccesstoken, async(req, res) => {
     `
         SELECT 
             posts.id AS post_id,
-            DATE_FORMAT(CONVERT_TZ(posts.created_at, '+00:00', '+08:00'), '%Y-%m-%d %H:%i:%s') AS created_at,
+            DATE_FORMAT(posts.created_at, '%Y-%m-%d %H:%i:%s') AS created_at,
             posts.context,
             users.id AS user_id,
             users.name,
