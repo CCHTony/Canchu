@@ -85,7 +85,7 @@ router.delete('/:id/like', verifyAccesstoken, async(req, res) => {
 
 router.post('/:id/comment', verifyAccesstoken, async(req, res) => {
     const connection = await connectionPromise;
-    const post_id = req.params.id;
+    const post_id = Number(req.params.id);
     const my_id = req.decoded.id;
     const content = req.body.content;
 
