@@ -123,7 +123,7 @@ router.get('/:id', verifyAccesstoken, async(req, res) => {
         'LEFT JOIN likes ON likes.post_id = posts.id ' +
         'LEFT JOIN comments ON comments.post_id = posts.id ' +
         'INNER JOIN users ON posts.poster_id = users.id ' +
-        'WHERE posts.id = ?' +
+        'WHERE posts.id = ? ' +
         'GROUP BY posts.id'
     ;
     console.log(mysQuery);
