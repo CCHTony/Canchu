@@ -83,5 +83,28 @@ router.delete('/:id/like', verifyAccesstoken, async(req, res) => {
 });
 
 
+router.post('/:id/comment', verifyAccesstoken, async(req, res) => {
+    const connection = await connectionPromise;
+    const post_id = req.params.id;
+    const my_id = req.decoded.id;
+    const content = req.body.content;
+
+    let mysQuery = 'INSERT INTO `comments` (`post_id`, `user_id`, `created_at`, `context`) VALUES (?, ?, NOW(), )';
+    const [comment] = await connection.execute(mysQuery, [post_id, my_id, content]);
+    console.log(comment);
+    const results = {
+        "data": {
+            "post": {
+                "id": post_id
+            },
+          "comment": {
+                "id": comment.insertId
+            }
+        }
+    }
+    res.json(results);
+});
+
+
 
 module.exports = router;
