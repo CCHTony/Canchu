@@ -11,7 +11,7 @@ router.post('/', verifyAccesstoken, async (req, res) => {
 	const my_id = req.decoded.id;
 	const context = req.body.context;
 
-	let mysQuery = 'INSERT INTO posts (`poster_id`, `created_at`, `context`, `like_count`, `comment_count`) VALUES (?, NOW(), ?, ?, ?)';
+	let mysQuery = 'INSERT INTO posts (poster_id, created_at, context, like_count, comment_count) VALUES (?, NOW(), ?, ?, ?)';
 	const [post] = await connection.execute(mysQuery, [my_id, context, 0, 0]);
 	console.log(post);
 	const results = {
@@ -30,7 +30,7 @@ router.put('/:id', verifyAccesstoken, async (req, res) => {
 	const post_id = req.params.id;
 	const context = req.body.context;
 
-	let mysQuery = 'UPDATE `posts` set `context` = ? where `id` = ?';
+	let mysQuery = 'UPDATE posts set context = ? where id = ?';
 	const [update] = await connection.execute(mysQuery, [context, post_id]);
 	console.log(update);
 	const results = {
@@ -49,8 +49,8 @@ router.post('/:id/like', verifyAccesstoken, async (req, res) => {
 	const post_id = req.params.id;
 	const my_id = req.decoded.id;
 
-	let mysQuery = 'INSERT INTO `likes` (`post_id`, `user_id`, `created_at`) VALUES (?, ?, NOW())';
-	const [like] = await connection.execute(mysQuery, [post_id, my_id]);
+	let likeQuery = 'INSERT IGNORE INTO likes (post_id, user_id, created_at) VALUES (?, ?, NOW())';
+	const [like] = await connection.execute(likeQuery, [post_id, my_id]);
 	console.log(like);
 	const results = {
 		"data": {
@@ -68,17 +68,20 @@ router.delete('/:id/like', verifyAccesstoken, async (req, res) => {
 	const post_id = req.params.id;
 	const my_id = req.decoded.id;
 
-	let mysQuery = 'DELETE FROM `likes` WHERE `post_id` = ? AND `user_id` = ?';
-	const [like] = await connection.execute(mysQuery, [post_id, my_id]);
+	let likeQuery = 'DELETE FROM likes WHERE post_id = ? AND user_id = ?';
+	const [like] = await connection.execute(likeQuery, [post_id, my_id]);
 	console.log(like);
-	const results = {
+	if(like.affectedRows === 0){
+		return res.status(400).json({ error: 'you do not like this post yet!' });
+	}
+	const response = {
 		"data": {
 			"post": {
 				"id": post_id
 			}
 		}
 	}
-	res.json(results);
+	res.json(response);
 });
 
 
@@ -88,7 +91,7 @@ router.post('/:id/comment', verifyAccesstoken, async (req, res) => {
 	const my_id = req.decoded.id;
 	const content = req.body.content;
 
-	let mysQuery = 'INSERT INTO `comments` (`post_id`, `user_id`, `created_at`, `content`) VALUES (?, ?, NOW(), ?)';
+	let mysQuery = 'INSERT INTO comments (post_id, user_id, created_at, content) VALUES (?, ?, NOW(), ?)';
 	const [comment] = await connection.execute(mysQuery, [post_id, my_id, content]);
 	console.log(comment);
 	const results = {
