@@ -114,7 +114,7 @@ router.get('/:id', verifyAccesstoken, async(req, res) => {
     `
         SELECT 
             posts.id AS post_id,
-            posts.created_at,
+            CONVERT_TZ(posts.created_at, '+00:00', '+08:00') AS created_at,
             posts.context,
             users.id AS user_id,
             users.name,
@@ -127,15 +127,13 @@ router.get('/:id', verifyAccesstoken, async(req, res) => {
         WHERE posts.id = ? 
         GROUP BY posts.id
     `;
-    console.log(mysQuery);
-    console.log(post_id);
     const post = (await connection.execute(mysQuery, [post_id]))[0][0];
-
     console.log(post);
+
     const results = {
         "data": {
             "post": {
-                "id": 1,
+                "id": post.post_id,
                 "created_at": "2023-04-09 22:21:48",
                 "context": "動態動態動態動態動態動態動態動態",
                 "is_liked": true,
