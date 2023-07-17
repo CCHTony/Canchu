@@ -115,6 +115,76 @@ router.post('/:id/comment', verifyAccesstoken, async (req, res) => {
 });
 
 
+router.get('/search', verifyAccesstoken, async (req, res) => {e
+	console.log(req.baseUrl);
+	const connection = await connectionPromise;
+	let search_id = req.query.user_id;
+	let cursor = req.query.cursor;
+	const my_id = req.decoded.id;
+
+	if(!search_id){
+		search_id = my_id;
+	}
+
+	let postIdCursor = 0;
+  if (cursor) {
+    postIdCursor = Number.parseInt(atob(cursor));
+  }
+
+	// Get post details
+	let postQuery =
+	`
+	SELECT
+		posts.id AS id,
+		DATE_FORMAT(CONVERT_TZ(posts.created_at, '+00:00', '+08:00'), '%Y-%m-%d %H:%i:%s') AS created_at,
+		posts.context,
+		users.id AS user_id,
+		users.name,
+		users.picture,
+		COUNT(DISTINCT likes.id) AS like_count,
+		COUNT(DISTINCT comments.id) AS comment_count,
+		(SELECT COUNT(*) FROM likes WHERE post_id = posts.id AND user_id = ?) AS is_liked
+	FROM posts
+	LEFT JOIN likes ON likes.post_id = posts.id
+	LEFT JOIN comments ON comments.post_id = posts.id
+	INNER JOIN users ON posts.poster_id = users.id
+	WHERE users.id = ? AND posts.id > ?
+	GROUP BY posts.id
+	LIMIT 10
+	`;
+	const [posts] = (await connection.execute(postQuery, [my_id, search_id, postIdCursor]));
+	console.log(posts);
+	if (!posts.length === 0) {
+		return res.status(404).json({ error: 'Post not found' });
+	}
+
+	const nextCursor = posts[posts.length - 1].id;
+  const encodedNextCursor = btoa(nextCursor.toString());
+
+  const formattedPosts = posts.map((post) => ({
+    id: post.id,
+    user_id: post.user_id,
+    created_at: post.created_at,
+    context: post.context,
+    is_liked: post.is_liked === 1,
+    like_count: post.like_count,
+    comment_count: post.comment_count,
+    picture: post.picture,
+    name: post.name
+  }));
+
+
+	 const response = {
+    data: {
+      posts: formattedPosts,
+      next_cursor: encodedNextCursor
+    }
+  };
+
+  res.json(response);
+});
+
+
 router.get('/:id', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
 	const post_id = req.params.id;
@@ -196,74 +266,7 @@ router.get('/:id', verifyAccesstoken, async (req, res) => {
 });
 
 
-router.get('/search', verifyAccesstoken, async (req, res) => {e
-	console.log(req.baseUrl);
-	const connection = await connectionPromise;
-	let search_id = req.query.user_id;
-	let cursor = req.query.cursor;
-	const my_id = req.decoded.id;
 
-	if(!search_id){
-		search_id = my_id;
-	}
-
-	let postIdCursor = 0;
-  if (cursor) {
-    postIdCursor = Number.parseInt(atob(cursor));
-  }
-
-	// Get post details
-	let postQuery =
-	`
-	SELECT
-		posts.id AS id,
-		DATE_FORMAT(CONVERT_TZ(posts.created_at, '+00:00', '+08:00'), '%Y-%m-%d %H:%i:%s') AS created_at,
-		posts.context,
-		users.id AS user_id,
-		users.name,
-		users.picture,
-		COUNT(DISTINCT likes.id) AS like_count,
-		COUNT(DISTINCT comments.id) AS comment_count,
-		(SELECT COUNT(*) FROM likes WHERE post_id = posts.id AND user_id = ?) AS is_liked
-	FROM posts
-	LEFT JOIN likes ON likes.post_id = posts.id
-	LEFT JOIN comments ON comments.post_id = posts.id
-	INNER JOIN users ON posts.poster_id = users.id
-	WHERE users.id = ? AND posts.id > ?
-	GROUP BY posts.id
-	LIMIT 10
-	`;
-	const [posts] = (await connection.execute(postQuery, [my_id, search_id, postIdCursor]));
-	console.log(posts);
-	if (!posts.length === 0) {
-		return res.status(404).json({ error: 'Post not found' });
-	}
-
-	const nextCursor = posts[posts.length - 1].id;
-  const encodedNextCursor = btoa(nextCursor.toString());
-
-  const formattedPosts = posts.map((post) => ({
-    id: post.id,
-    user_id: post.user_id,
-    created_at: post.created_at,
-    context: post.context,
-    is_liked: post.is_liked === 1,
-    like_count: post.like_count,
-    comment_count: post.comment_count,
-    picture: post.picture,
-    name: post.name
-  }));
-
-
-	 const response = {
-    data: {
-      posts: formattedPosts,
-      next_cursor: encodedNextCursor
-    }
-  };
-
-  res.json(response);
-});
 
 
 module.exports = router;
