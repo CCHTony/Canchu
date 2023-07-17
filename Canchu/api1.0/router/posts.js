@@ -155,9 +155,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 
 	let [posts] = (await connection.execute(postQuery, [my_id, search_id, postIdCursor]));
 	console.log(posts);
-	if (posts.length === 0) {
-		return res.status(404).json({ error: 'Post not found' });
-	}
+
 	let encodedNextCursor;
 	if(posts.length === 11){
 		const nextCursor = posts[posts.length - 1].id;
