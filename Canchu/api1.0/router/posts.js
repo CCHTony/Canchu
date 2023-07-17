@@ -148,7 +148,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 	LEFT JOIN likes ON likes.post_id = posts.id
 	LEFT JOIN comments ON comments.post_id = posts.id
 	INNER JOIN users ON posts.poster_id = users.id
-	WHERE users.id = ? AND posts.id > ?
+	WHERE users.id = ? AND posts.id >= ?
 	GROUP BY posts.id
 	LIMIT 11
 	`;
@@ -160,7 +160,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 	if(posts.length === 11){
 		const nextCursor = posts[posts.length - 1].id;
   	encodedNextCursor = btoa(nextCursor.toString());
-		posts = posts.slice(0, 9);
+		posts = posts.slice(0, 10);
 	}
 	else{
 		encodedNextCursor = null;
