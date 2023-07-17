@@ -198,18 +198,30 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 	const result = (await connection.execute(profilelQuery, [my_id, my_id, user_id]))[0][0];
 	console.log(result);
 	
-	let relation;
-	if (result.status === 1) {
-		relation = 'friend'
-	}
-	else{
-		if (result.sender_id === my_id) {
-			relation = 'requested';
+	let friendship = null;
+	if(result.friendship_id){
+		if (result.status === 1) {
+			friendship = {
+				id: result.friendship_id,
+				status:; 'friend',
+			}
 		}
-		else {
-			relation = 'pending';
+		else{
+			if (result.sender_id === my_id) {
+				friendship = {
+					id: result.friendship_id,
+					status: 'requested',
+				};
+			}
+			else {
+				friendship = {
+					id: result.friendship_id,
+					status: 'pending',
+				};
+			}
 		}
 	}
+
 	const response = {
 		data: {
 			user: {
@@ -219,10 +231,7 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 				friend_count: result.friend_count,
 				introduction: result.intro,
 				tags: result.tags,
-				friendship: {
-					id: result.friendship_id,
-					status: relation,
-				}
+				friendship: friendship,
 			}
 		}
 	};
