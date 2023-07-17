@@ -196,7 +196,8 @@ router.get('/:id', verifyAccesstoken, async (req, res) => {
 });
 
 
-router.get('/search', verifyAccesstoken, async (req, res) => {
+router.get('/search', verifyAccesstoken, async (req, res) => {e
+	console.log(req.baseUrl);
 	const connection = await connectionPromise;
 	let search_id = req.query.user_id;
 	let cursor = req.query.cursor;
