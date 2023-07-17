@@ -150,16 +150,23 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 	INNER JOIN users ON posts.poster_id = users.id
 	WHERE users.id = ? AND posts.id > ?
 	GROUP BY posts.id
-	LIMIT 10
+	LIMIT 11
 	`;
-	const [posts] = (await connection.execute(postQuery, [my_id, search_id, postIdCursor]));
+
+	let [posts] = (await connection.execute(postQuery, [my_id, search_id, postIdCursor]));
 	console.log(posts);
-	if (!posts.length === 0) {
+	if (posts.length === 0) {
 		return res.status(404).json({ error: 'Post not found' });
 	}
-
-	const nextCursor = posts[posts.length - 1].id;
-  const encodedNextCursor = btoa(nextCursor.toString());
+	let encodedNextCursor;
+	if(posts.length === 11){
+		const nextCursor = posts[posts.length - 1].id;
+  	encodedNextCursor = btoa(nextCursor.toString());
+		posts = posts.slice(0, 9);
+	}
+	else{
+		encodedNextCursor = null;
+	}
 
   const formattedPosts = posts.map((post) => ({
     id: post.id,
