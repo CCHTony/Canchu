@@ -170,23 +170,58 @@ router.post('/signin', async (req, res) => {
 
 router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
-	const userId = Number(req.params.id);
+	const user_id = Number(req.params.id);
+	const my_id = req.decoded.id;
 
-	const mysqlQuery = 'SELECT * FROM users WHERE id = ?';
-	const [rows] = await connection.execute(mysqlQuery, [userId]);
-	console.log(rows[0]);
+	const profilelQuery = 
+	`
+	SELECT
+		users.id,
+		users.name,
+		users.picture,
+		users.intro,
+		users.tags,
+		(
+			SELECT COUNT(*) 
+			FROM friendship 
+			WHERE (sender_id = users.id OR receiver_id = users.id) AND is_friend = 1
+		) AS friend_count,
+		friendship.id AS friendship_id,
+		friendship.is_friend AS status,
+		friendship.sender_id,
+		friendship.receiver_id,
+	FROM users
+	LEFT JOIN friendship 
+	ON (sender_id = users.id OR receiver_id = users.id) AND (sender_id = ? OR receiver_id = ?)
+	WHERE users.id = ?
+	`;
+	const result = (await connection.execute(profilelQuery, [my_id, my_id, user_id]))[0][0];
+	console.log(result);
+	
+	let relation;
+	if (result.status === 1) {
+		relation = 'friend'
+	}
+	else{
+		if (result.sender_id === my_id) {
+			relation = 'requested';
+		}
+		else {
+			relation = 'pending';
+		}
+	}
 	const response = {
-		"data": {
-			"user": {
-				"id": userId,
-				"name": rows[0].name,
-				"picture": rows[0].picture,
-				"friend_count": rows[0].friend_count,
-				"introduction": rows[0].intro,
-				"tags": rows[0].tags,
-				"friendship": {
-					"id": 0,
-					"status": "requested"
+		data: {
+			user: {
+				id: user_id,
+				name: result.name,
+				picture: result.picture,
+				friend_count: result.friend_count,
+				introduction: result.intro,
+				tags: result.tags,
+				friendship: {
+					id: result.friendship_id,
+					status: relation,
 				}
 			}
 		}
@@ -223,7 +258,7 @@ router.put('/picture', verifyAccesstoken, upload.single('picture'), async (req, 
 			"picture": url
 		}
 	}
-	let mysQuery = 'update users set `picture` = ? where `id` = ?';
+	let mysQuery = 'UPDATE users SET picture = ? WHERE id = ?';
 	const [rows] = await connection.execute(mysQuery, [url, id]);
 	res.json(response);
 });
