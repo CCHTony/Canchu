@@ -116,22 +116,20 @@ router.post('/:id/comment', verifyAccesstoken, async (req, res) => {
 
 
 router.get('/search', verifyAccesstoken, async (req, res) => {
-	console.log(req.baseUrl);
+
 	const connection = await connectionPromise;
 	let search_id = req.query.user_id;
 	let cursor = req.query.cursor;
 	const my_id = req.decoded.id;
 
-	if(!search_id){
-		search_id = my_id;
-	}
 
 	let postIdCursor = 0;
   if (cursor) {
     postIdCursor = Number.parseInt(atob(cursor));
   }
 
-	// Get post details
+	//initialize MySQL query 
+	let param = [];
 	let postQuery =
 	`
 	SELECT
@@ -147,13 +145,39 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 	FROM posts
 	LEFT JOIN likes ON likes.post_id = posts.id
 	LEFT JOIN comments ON comments.post_id = posts.id
-	INNER JOIN users ON posts.poster_id = users.id
-	WHERE users.id = ? AND posts.id >= ?
+	INNER JOIN users ON posts.poster_id = users.id 
+	`;
+
+	let condition;
+	if(!search_id){
+		condition = 
+		`
+		WHERE (users.id = ? OR users.id IN (
+			SELECT CASE
+				WHEN friendship.sender_id = ? THEN friendship.receiver_id
+				ELSE friendship.sender_id
+			END AS friend_id
+			FROM friendship
+			WHERE (friendship.sender_id = ? OR friendship.receiver_id = ?) AND friendship.is_friend = 1
+		)) AND posts.id >= ? 
+		`;
+		param = [my_id, search_id, search_id, search_id, search_id, postIdCursor]
+	}
+	else{
+		condition = `WHERE users.id = ? AND posts.id >= ? `;
+		param = [my_id, search_id, postIdCursor]
+	}
+
+	const suffix = 
+	`
 	GROUP BY posts.id
 	LIMIT 11
 	`;
 
-	let [posts] = (await connection.execute(postQuery, [my_id, search_id, postIdCursor]));
+	postQuery += (condition + suffix);
+
+	// Get post details
+	let [posts] = await connection.execute(postQuery, param);
 	console.log(posts);
 
 	let encodedNextCursor;
