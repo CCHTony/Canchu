@@ -189,7 +189,7 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 		friendship.id AS friendship_id,
 		friendship.is_friend AS status,
 		friendship.sender_id,
-		friendship.receiver_id,
+		friendship.receiver_id
 	FROM users
 	LEFT JOIN friendship 
 	ON (sender_id = users.id OR receiver_id = users.id) AND (sender_id = ? OR receiver_id = ?)
