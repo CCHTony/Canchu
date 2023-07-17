@@ -153,7 +153,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 	LIMIT 11
 	`;
 
-	let [posts] = (await connection.execute(postQuery, [my_id, search_id, postIdCursor]));
+	let posts = (await connection.execute(postQuery, [my_id, search_id, postIdCursor]));
 	console.log(posts);
 	if (posts.length === 0) {
 		return res.status(404).json({ error: 'Post not found' });
