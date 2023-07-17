@@ -203,8 +203,8 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 		if (result.status === 1) {
 			friendship = {
 				id: result.friendship_id,
-				status:; 'friend',
-			}
+				status:'friend',
+			};
 		}
 		else{
 			if (result.sender_id === my_id) {
