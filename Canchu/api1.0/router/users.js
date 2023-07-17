@@ -243,8 +243,8 @@ router.put('/profile', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
 	const id = req.decoded.id;
 	const { name, introduction, tags } = req.body;
-	let mysQuery = 'update users set `name` = ?, `intro` = ?, `tags` = ? where `id` = ?';
-	const [rows] = await connection.execute(mysQuery, [name, introduction, tags, id]);
+	let updateQuery = 'UPDATE users SET name = ?, intro = ?, tags = ? where id = ?';
+	const [rows] = await connection.execute(updateQuery, [name, introduction, tags, id]);
 	const response = {
 		"data": {
 			"user": {
@@ -267,8 +267,8 @@ router.put('/picture', verifyAccesstoken, upload.single('picture'), async (req, 
 			"picture": url
 		}
 	}
-	let mysQuery = 'UPDATE users SET picture = ? WHERE id = ?';
-	const [rows] = await connection.execute(mysQuery, [url, id]);
+	let updateQuery = 'UPDATE users SET picture = ? WHERE id = ?';
+	const [rows] = await connection.execute(updateQuery, [url, id]);
 	res.json(response);
 });
 
