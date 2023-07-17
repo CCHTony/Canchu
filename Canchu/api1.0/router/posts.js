@@ -253,24 +253,16 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
     name: post.name
   }));
 
-	
-	// Build the response object
-	const response = {
-		data: {
-			post: {
-				id: post.postId,
-				created_at: post.created_at,
-				context: post.context,
-				is_liked: isLiked,
-				like_count: post.like_count,
-				comment_count: post.comment_count,
-				picture: post.picture,
-				name: post.name,
-				comments: comments,
-			},
-		},
-	};
-	res.json(response);
+
+	 const response = {
+    data: {
+      posts: formattedPosts,
+      next_cursor: encodedNextCursor
+    }
+  };
+
+  res.json(response);
 });
+
 
 module.exports = router;

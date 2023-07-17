@@ -44,8 +44,8 @@ router.post('/signup', async (req, res) => {
 		// 使用 crypto 加密
 		const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
 
-		signupQuery = 'INSERT INTO users(name, email, password, picture, provider) VALUES(?,?,?,?,?)';
-		const [results] = await connection.execute(signinQuery, [name, email, hashedPassword, null, 'native']);
+		let signupQuery = 'INSERT INTO users(name, email, password, picture, provider) VALUES(?,?,?,?,?)';
+		const [results] = await connection.execute(signupQuery, [name, email, hashedPassword, null, 'native']);
 		let id = results.insertId;
 
 		const payload = {
