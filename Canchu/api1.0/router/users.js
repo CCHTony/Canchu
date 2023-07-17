@@ -41,7 +41,7 @@ router.post('/signup', async (req, res) => {
 			return res.status(403).json({ error: 'It should not be possible to register with a duplicate email.' });
 		}
 
-		// 使用 crypto 对密码进行加密
+		// 使用 crypto 加密
 		const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
 
 		signupQuery = 'INSERT INTO users(name, email, password, picture, provider) VALUES(?,?,?,?,?)';
@@ -112,7 +112,6 @@ router.post('/signin', async (req, res) => {
 				"id": id,
 				"name": name,
 				"email": email,
-				"password": password,
 				"provider": 'native',
 				"picture": picture
 			};
