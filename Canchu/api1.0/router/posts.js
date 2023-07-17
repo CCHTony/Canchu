@@ -161,7 +161,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 			WHERE (friendship.sender_id = ? OR friendship.receiver_id = ?) AND friendship.is_friend = 1
 		)) AND posts.id >= ? 
 		`;
-		param = [my_id, search_id, search_id, search_id, search_id, postIdCursor]
+		param = [my_id, my_id, my_id, my_id, my_id, postIdCursor]
 	}
 	else{
 		condition = `WHERE users.id = ? AND posts.id >= ? `;
