@@ -115,7 +115,7 @@ router.post('/:id/comment', verifyAccesstoken, async (req, res) => {
 });
 
 
-router.get('/search', verifyAccesstoken, async (req, res) => {e
+router.get('/search', verifyAccesstoken, async (req, res) => {
 	console.log(req.baseUrl);
 	const connection = await connectionPromise;
 	let search_id = req.query.user_id;
