@@ -19,7 +19,7 @@ router.get('/', verifyAccesstoken, async (req, res) => {
 				users.picture, 
 				friendship.id AS friendship_id 
 			FROM users JOIN friendship 
-			ON users.id = friendship.sender_id OR users.id = friendshipreceiver_id 
+			ON users.id = friendship.sender_id OR users.id = friendship.receiver_id 
 			WHERE friendship.is_friend = true AND (friendship.receiver_id = ? OR friendship.sender_id = ?) AND users.id != ?
     `;
 	const [friends] = await connection.execute(friendQuery, [my_id, my_id, my_id]);
