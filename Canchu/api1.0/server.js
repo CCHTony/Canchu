@@ -6,7 +6,7 @@ require('dotenv').config();
 
 app.use(cors());
 app.use(express.json());
-app.use('/public', express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/public'));
 
 const usersRouter = require('./router/users');
 const friendsRouter = require('./router/friends');
