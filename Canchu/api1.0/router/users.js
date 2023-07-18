@@ -261,10 +261,10 @@ router.put('/picture', verifyAccesstoken, upload.single('picture'), async (req, 
 	const id = req.decoded.id;
 	const picture = req.file;
 
-	const url = `http://52.64.240.159/${picture.filename}`
+	const url = `https://52.64.240.159/${picture.filename}`
 	response = {
-		"data": {
-			"picture": url
+		data: {
+			picture: url
 		}
 	}
 	let updateQuery = 'UPDATE users SET picture = ? WHERE id = ?';
