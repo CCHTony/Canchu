@@ -201,27 +201,26 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 	console.log(my_id);
 	console.log({user:user_id});
 	console.log(result);
-	if(my_id !== user_id){
-		if(result.friendship_id){
-			if (result.status === 1) {
+	
+	if(result.friendship_id){
+		if (result.status === 1) {
+			friendship = {
+				id: result.friendship_id,
+				status:'friend',
+			};
+		}
+		else{
+			if (result.sender_id === my_id) {
 				friendship = {
 					id: result.friendship_id,
-					status:'friend',
+					status: 'requested',
 				};
 			}
-			else{
-				if (result.sender_id === my_id) {
-					friendship = {
-						id: result.friendship_id,
-						status: 'requested',
-					};
-				}
-				else {
-					friendship = {
-						id: result.friendship_id,
-						status: 'pending',
-					};
-				}
+			else {
+				friendship = {
+					id: result.friendship_id,
+					status: 'pending',
+				};
 			}
 		}
 	}
