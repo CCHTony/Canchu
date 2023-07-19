@@ -11,8 +11,8 @@ router.post('/', verifyAccesstoken, async (req, res) => {
 	const my_id = req.decoded.id;
 	const context = req.body.context;
 
-	let mysQuery = 'INSERT INTO posts (poster_id, created_at, context, like_count, comment_count) VALUES (?, NOW(), ?, ?, ?)';
-	const [post] = await connection.execute(mysQuery, [my_id, context, 0, 0]);
+	const postQuery = 'INSERT INTO posts (poster_id, created_at, context, like_count, comment_count) VALUES (?, NOW(), ?, ?, ?)';
+	const [post] = await connection.execute(postQuery, [my_id, context, 0, 0]);
 	console.log(post);
 	const results = {
 		"data": {
@@ -160,12 +160,12 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 			END AS friend_id
 			FROM friendship
 			WHERE (friendship.sender_id = ? OR friendship.receiver_id = ?) AND friendship.is_friend = 1
-		)) AND posts.id >= ? 
+		)) AND posts.id <= ? 
 		`;
 		param = [my_id, my_id, my_id, my_id, my_id, postIdCursor];
 	}
 	else{
-		condition = `WHERE users.id = ? AND posts.id >= ? `;
+		condition = `WHERE users.id = ? AND posts.id <= ? `;
 		param = [my_id, search_id, postIdCursor];
 	}
 
