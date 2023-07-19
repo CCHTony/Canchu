@@ -276,7 +276,7 @@ router.put('/picture', verifyAccesstoken, upload.single('picture'), async (req, 
 router.get('/search', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
 	const my_id = req.decoded.id;
-	const keyword = `'%${req.query.keyword}%'`;
+	const keyword = `%${req.query.keyword}%`;
 
 	console.log(keyword);
 	let searchQuery = 
