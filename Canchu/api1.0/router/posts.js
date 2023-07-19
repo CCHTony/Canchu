@@ -172,6 +172,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 	const suffix = 
 	`
 	GROUP BY posts.id
+	ORDER BY posts.created_at DESC
 	LIMIT 11
 	`;
 
