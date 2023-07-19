@@ -34,7 +34,7 @@ router.get('/', verifyAccesstoken, async (req, res) => {
         "status": "friend"
     }
 	}));
-	
+
 	const response = {
 		"data": {
 			"users": my_friends
@@ -49,6 +49,9 @@ router.post('/:user_id/request', verifyAccesstoken, async (req, res) => {
 	const receiver_id = req.params.user_id;
 	const sender_id = req.decoded.id
 
+	if(receiver_id === sender_id){
+		return res.status(400).json({ error: 'You can not send request to yourself' });
+	}
 	const userQuery = 'SELECT id FROM users WHERE id = ?';
 	const [is_receiver_exist] = await connection.execute(userQuery, [receiver_id]);
 	if (!is_receiver_exist.length) {
@@ -86,7 +89,7 @@ router.get('/pending', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
 	const my_id = req.decoded.id;
 
-	let mysQuery =
+	const friendQuery =
 		`
 			SELECT 
 				users.id AS user_id, 
@@ -97,7 +100,7 @@ router.get('/pending', verifyAccesstoken, async (req, res) => {
 			ON users.id = friendship.sender_id 
 			WHERE friendship.receiver_id = ? AND friendship.is_friend = false
     `;
-	const [pending] = await connection.execute(mysQuery, [my_id]);
+	const [pending] = await connection.execute(friendQuery, [my_id]);
 	console.log(pending);
 	const user_result = pending.map(item => ({
 		id: item.user_id,
