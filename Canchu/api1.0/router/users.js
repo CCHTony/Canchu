@@ -276,7 +276,7 @@ router.put('/picture', verifyAccesstoken, upload.single('picture'), async (req, 
 router.get('/search', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
 	const my_id = req.decoded.id;
-	const keyword = `%${req.query.keyword}%`;
+	const keyword = `'%${req.query.keyword}%'`;
 
 	console.log(keyword);
 	let searchQuery = 
@@ -290,14 +290,42 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 			friendship.sender_id, 
 			friendship.receiver_id 
 		FROM users LEFT JOIN friendship 
-		ON users.id = friendship.sender_id OR users.id = friendship.receiver_id 
+		ON (users.id = friendship.sender_id AND friendship.receiver_id = ?) OR (users.id = friendship.receiver_id AND friendship.sender_id = ?) 
 		WHERE name LIKE ?
 		`;
 	console.log(searchQuery);
-	const [search_result] = await connection.execute(searchQuery, [keyword]);
+	const [search_result] = await connection.execute(searchQuery, [my_id, my_id, keyword]);
 	console.log(search_result);
 
-	let result = [];
+
+	const userArr = search_result.map((user) => {
+		let friendship = null;
+		if (user.is_friend === 1) {
+			friendship = {
+				id: user.friendship_id,
+				status: 'friend'
+			}
+		}
+		else if (user.sender_id === my_id) {
+			friendship = {
+				"id": user.friendship_id,
+				"status": "requested"
+			};
+		}
+		else if(user.receiver_id === my_id){
+			friendship = {
+				"id": user.friendship_id,
+				"status": "pending"
+			};
+		}
+		return {
+			id: user.user_id,
+			name: user.name,
+			picture: user.picture,
+			friendship: friendship
+		};
+	});
+	/*let result = [];
 	for (let i = 0; i < search_result.length; i++) {
 		let friendship = null;
 		if (search_result[i].sender_id === my_id || search_result[i].receiver_id === my_id) {
@@ -351,14 +379,13 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 				}
 			}
 		}
-	}
-	console.log(result.length);
-	const results = {
+	}*/
+	const response = {
 		"data": {
-			"users": result
+			"users": userArr
 		}
 	}
-	res.json(results);
+	return res.json(response);
 });
 
 
