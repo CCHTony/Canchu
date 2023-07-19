@@ -198,29 +198,31 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 	const result = (await connection.execute(profilelQuery, [my_id, my_id, user_id]))[0][0];
 	
 	let friendship = null;
-	if(result.friendship_id){
-		if (result.status === 1) {
-			friendship = {
-				id: result.friendship_id,
-				status:'friend',
-			};
-		}
-		else{
-			if (result.sender_id === my_id) {
+	if(my_id !== user_id){
+		if(result.friendship_id){
+			if (result.status === 1) {
 				friendship = {
 					id: result.friendship_id,
-					status: 'requested',
+					status:'friend',
 				};
 			}
-			else {
-				friendship = {
-					id: result.friendship_id,
-					status: 'pending',
-				};
+			else{
+				if (result.sender_id === my_id) {
+					friendship = {
+						id: result.friendship_id,
+						status: 'requested',
+					};
+				}
+				else {
+					friendship = {
+						id: result.friendship_id,
+						status: 'pending',
+					};
+				}
 			}
 		}
 	}
-
+	
 	const response = {
 		data: {
 			user: {
@@ -234,7 +236,7 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 			}
 		}
 	};
-	res.json(response);
+	return res.json(response);
 });
 
 
@@ -252,7 +254,7 @@ router.put('/profile', verifyAccesstoken, async (req, res) => {
 			}
 		}
 	};
-	res.json(response);
+	return res.json(response);
 });
 
 
@@ -269,7 +271,7 @@ router.put('/picture', verifyAccesstoken, upload.single('picture'), async (req, 
 	}
 	let updateQuery = 'UPDATE users SET picture = ? WHERE id = ?';
 	const [rows] = await connection.execute(updateQuery, [url, id]);
-	res.json(response);
+	return res.json(response);
 });
 
 
