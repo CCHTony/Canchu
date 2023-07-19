@@ -196,7 +196,6 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 	WHERE users.id = ?
 	`;
 	const result = (await connection.execute(profilelQuery, [my_id, my_id, user_id]))[0][0];
-	console.log(result);
 	
 	let friendship = null;
 	if(result.friendship_id){
@@ -243,6 +242,7 @@ router.put('/profile', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
 	const id = req.decoded.id;
 	const { name, introduction, tags } = req.body;
+
 	let updateQuery = 'UPDATE users SET name = ?, intro = ?, tags = ? where id = ?';
 	const [rows] = await connection.execute(updateQuery, [name, introduction, tags, id]);
 	const response = {
@@ -293,10 +293,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 		ON (users.id = friendship.sender_id AND friendship.receiver_id = ?) OR (users.id = friendship.receiver_id AND friendship.sender_id = ?) 
 		WHERE name LIKE ? AND users.id <> ?
 		`;
-	console.log(searchQuery);
 	const [search_result] = await connection.execute(searchQuery, [my_id, my_id, keyword, my_id]);
-	console.log(search_result);
-
 
 	const userArr = search_result.map((user) => {
 		let friendship = null;
@@ -325,61 +322,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 			friendship: friendship
 		};
 	});
-	/*let result = [];
-	for (let i = 0; i < search_result.length; i++) {
-		let friendship = null;
-		if (search_result[i].sender_id === my_id || search_result[i].receiver_id === my_id) {
-			if (search_result[i].is_friend === 1) {
-				friendship = {
-					"id": search_result[i].friendship_id,
-					"status": "friend"
-				}
-			}
-			else if (search_result[i].is_friend === 0) {
-				if (search_result[i].sender_id === my_id) {
-					friendship = {
-						"id": search_result[i].friendship_id,
-						"status": "requested"
-					};
-				}
-				else {
-					friendship = {
-						"id": search_result[i].friendship_id,
-						"status": "pending"
-					};
-				}
-			}
-		}
-		if (i === search_result.length - 1) {
-			temp = {
-				"id": search_result[i].id,
-				"name": search_result[i].name,
-				"picture": search_result[i].picture,
-				"friendship": friendship
-			};
-			result.push(temp);
-		}
-		else {
-			if (search_result[i].user_id === search_result[i + 1].user_id && friendship === null) {
-				continue;
-			}
-			else {
-				let temp = {
-					"id": search_result[i].id,
-					"name": search_result[i].name,
-					"picture": search_result[i].picture,
-					"friendship": friendship
-				};
-				result.push(temp);
-				while (search_result[i].user_id === search_result[i + 1].user_id) {
-					i++;
-					if (i === search_result.length) {
-						break;
-					}
-				}
-			}
-		}
-	}*/
+	
 	const response = {
 		"data": {
 			"users": userArr

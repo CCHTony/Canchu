@@ -25,19 +25,16 @@ router.get('/', verifyAccesstoken, async (req, res) => {
 	const [friends] = await connection.execute(friendQuery, [my_id, my_id, my_id]);
 	console.log(friends)
 
-	let my_friends = []
-	for (let i = 0; i < friends.length; i++) {
-		let temp = {
-			"id": friends[i].user_id,
-			"name": friends[i].name,
-			"picture": friends[i].picture,
-			"friendship": {
-				"id": friends[i].friendship_id,
-				"status": "friend"
-			}
-		}
-		my_friends.push(temp);
-	}
+	const my_friends = friends.map((friend) => ({
+    "id": friend.user_id,
+    "name": friend.name,
+    "picture": friend.picture,
+    "friendship": {
+        "id": friend.friendship_id,
+        "status": "friend"
+    }
+	}));
+	
 	const response = {
 		"data": {
 			"users": my_friends

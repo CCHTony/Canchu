@@ -9,34 +9,42 @@ router.get('/', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
 	const my_id = req.decoded.id;
 
-	let notification_result = [];
-	let mysQuery = 'SELECT `events`.`id` AS `events_id`, `type`, `is_read`, DATE_FORMAT(`created_at`, "%Y-%m-%d %H:%i:%s") AS `formatted_created_at`, `name`, `picture` FROM `users` JOIN `events` ON `users`.`id` = `events`.`sender_id` WHERE `receiver_id` = ?';
-	const [notification] = await connection.execute(mysQuery, [my_id]);
-	console.log(notification);
-	for (let i = 0; i < notification.length; i++) {
+	const eventQuery = 
+	`
+	SELECT 
+		events.id AS events_id, 
+		type, is_read, 
+		DATE_FORMAT(CONVERT_TZ(created_at, '+00:00', '+08:00'), "%Y-%m-%d %H:%i:%s") AS formatted_created_at, 
+		name, picture 
+	FROM users JOIN events 
+	ON users.id = events.sender_id 
+	WHERE receiver_id = ? 
+	ORDER BY created_at DESC
+	`;
+	const [notification] = await connection.execute(eventQuery, [my_id]);
+
+	const notification_result = notification.map((notification) => {
 		let summary = '';
-		if (notification[i].type === 'friend request') {
+		if (notification.type === 'friend request') {
 			summary = 'invited you to be friends.';
-		}
-		else {
+		} else {
 			summary = 'has accepted your friend request.';
 		}
-		let temp = {
-			"id": notification[i].events_id,
-			"type": notification[i].type,
-			"is_read": Boolean(notification[i].is_read),
-			"image": notification[i].picture,
-			"created_at": notification[i].formatted_created_at,
-			"summary": `${notification[i].name} ${summary}`
+		return {
+			id: notification.events_id,
+			type: notification.type,
+			is_read: Boolean(notification.is_read),
+			image: notification.picture,
+			created_at: notification.formatted_created_at,
+			summary: `${notification.name} ${summary}`,
 		};
-		notification_result.push(temp);
-	}
-	const result = {
+	});
+	const response = {
 		"data": {
 			"events": notification_result
 		}
 	};
-	res.json(result);
+	res.json(response);
 });
 
 
