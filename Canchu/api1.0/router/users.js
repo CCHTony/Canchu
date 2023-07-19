@@ -198,6 +198,9 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 	const result = (await connection.execute(profilelQuery, [my_id, my_id, user_id]))[0][0];
 	
 	let friendship = null;
+	console.log(my_id);
+	console.log(user_id);
+	console.log(result);
 	if(my_id !== user_id){
 		if(result.friendship_id){
 			if (result.status === 1) {
