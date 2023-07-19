@@ -124,7 +124,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 	const my_id = req.decoded.id;
 
 
-	let postIdCursor = 0;
+	let postIdCursor = 18446744073709551615n;
   if (cursor) {
     postIdCursor = Number.parseInt(atob(cursor));
   }
