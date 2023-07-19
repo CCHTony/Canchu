@@ -195,51 +195,57 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 	ON (sender_id = users.id OR receiver_id = users.id) AND (sender_id = ? OR receiver_id = ?)
 	WHERE users.id = ?
 	`;
-	const result = (await connection.execute(profilelQuery, [my_id, my_id, user_id]))[0][0];
+	try{
+		const result = (await connection.execute(profilelQuery, [my_id, my_id, user_id]))[0][0];
 	
-	let friendship = null;
-	console.log(my_id);
-	console.log({user:user_id});
-	console.log(result);
-	if(my_id !== user_id){
-		if(result.friendship_id){
-			if (result.status === 1) {
-				friendship = {
-					id: result.friendship_id,
-					status:'friend',
-				};
-			}
-			else{
-				if (result.sender_id === my_id) {
+		let friendship = null;
+		console.log(my_id);
+		console.log({user:user_id});
+		console.log(result);
+		if(my_id !== user_id){
+			if(result.friendship_id){
+				if (result.status === 1) {
 					friendship = {
 						id: result.friendship_id,
-						status: 'requested',
+						status:'friend',
 					};
 				}
-				else {
-					friendship = {
-						id: result.friendship_id,
-						status: 'pending',
-					};
+				else{
+					if (result.sender_id === my_id) {
+						friendship = {
+							id: result.friendship_id,
+							status: 'requested',
+						};
+					}
+					else {
+						friendship = {
+							id: result.friendship_id,
+							status: 'pending',
+						};
+					}
 				}
 			}
 		}
+		
+		const response = {
+			data: {
+				user: {
+					id: user_id,
+					name: result.name,
+					picture: result.picture,
+					friend_count: result.friend_count,
+					introduction: result.intro,
+					tags: result.tags,
+					friendship: friendship,
+				}
+			}
+		};
+		return res.json(response);
 	}
-	
-	const response = {
-		data: {
-			user: {
-				id: user_id,
-				name: result.name,
-				picture: result.picture,
-				friend_count: result.friend_count,
-				introduction: result.intro,
-				tags: result.tags,
-				friendship: friendship,
-			}
-		}
-	};
-	return res.json(response);
+	catch(err){
+		res.status(500).json({ error: "Server Error." });
+		console.log(err);
+	}
 });
 
 
@@ -248,16 +254,22 @@ router.put('/profile', verifyAccesstoken, async (req, res) => {
 	const id = req.decoded.id;
 	const { name, introduction, tags } = req.body;
 
-	let updateQuery = 'UPDATE users SET name = ?, intro = ?, tags = ? where id = ?';
-	const [rows] = await connection.execute(updateQuery, [name, introduction, tags, id]);
-	const response = {
-		"data": {
-			"user": {
-				"id": id
+	try{
+		const updateQuery = 'UPDATE users SET name = ?, intro = ?, tags = ? where id = ?';
+		const [rows] = await connection.execute(updateQuery, [name, introduction, tags, id]);
+		const response = {
+			"data": {
+				"user": {
+					"id": id
+				}
 			}
-		}
-	};
-	return res.json(response);
+		};
+		return res.json(response);
+	}
+	catch(err){
+		res.status(500).json({ error: "Server Error." });
+		console.log(err);
+	}
 });
 
 
@@ -265,16 +277,21 @@ router.put('/picture', verifyAccesstoken, upload.single('picture'), async (req, 
 	const connection = await connectionPromise;
 	const id = req.decoded.id;
 	const picture = req.file;
-
-	const url = `https://52.64.240.159/${picture.filename}`
-	response = {
-		data: {
-			picture: url
+	try{
+		const updateQuery = 'UPDATE users SET picture = ? WHERE id = ?';
+		const [rows] = await connection.execute(updateQuery, [url, id]);
+		const url = `https://52.64.240.159/${picture.filename}`
+		response = {
+			data: {
+				picture: url
+			}
 		}
+		return res.json(response);
 	}
-	let updateQuery = 'UPDATE users SET picture = ? WHERE id = ?';
-	const [rows] = await connection.execute(updateQuery, [url, id]);
-	return res.json(response);
+	catch(err){
+		res.status(500).json({ error: "Server Error." });
+		console.log(err);
+	}
 });
 
 
@@ -297,43 +314,50 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 		FROM users LEFT JOIN friendship 
 		ON (users.id = friendship.sender_id AND friendship.receiver_id = ?) OR (users.id = friendship.receiver_id AND friendship.sender_id = ?) 
 		WHERE name LIKE ? AND users.id <> ?
-		`;
-	const [search_result] = await connection.execute(searchQuery, [my_id, my_id, keyword, my_id]);
+	`;
+	
+	try{
+		const [search_result] = await connection.execute(searchQuery, [my_id, my_id, keyword, my_id]);
 
-	const userArr = search_result.map((user) => {
-		let friendship = null;
-		if (user.is_friend === 1) {
-			friendship = {
-				id: user.friendship_id,
-				status: 'friend'
+		const userArr = search_result.map((user) => {
+			let friendship = null;
+			if (user.is_friend === 1) {
+				friendship = {
+					id: user.friendship_id,
+					status: 'friend'
+				}
+			}
+			else if (user.sender_id === my_id) {
+				friendship = {
+					"id": user.friendship_id,
+					"status": "requested"
+				};
+			}
+			else if(user.receiver_id === my_id){
+				friendship = {
+					"id": user.friendship_id,
+					"status": "pending"
+				};
+			}
+			return {
+				id: user.user_id,
+				name: user.name,
+				picture: user.picture,
+				friendship: friendship
+			};
+		});
+		
+		const response = {
+			"data": {
+				"users": userArr
 			}
 		}
-		else if (user.sender_id === my_id) {
-			friendship = {
-				"id": user.friendship_id,
-				"status": "requested"
-			};
-		}
-		else if(user.receiver_id === my_id){
-			friendship = {
-				"id": user.friendship_id,
-				"status": "pending"
-			};
-		}
-		return {
-			id: user.user_id,
-			name: user.name,
-			picture: user.picture,
-			friendship: friendship
-		};
-	});
-	
-	const response = {
-		"data": {
-			"users": userArr
-		}
+		return res.json(response);
 	}
-	return res.json(response);
+	catch(err){
+		res.status(500).json({ error: "Server Error." });
+		console.log(err);
+	}
 });
 
 
