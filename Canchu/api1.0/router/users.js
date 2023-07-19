@@ -291,10 +291,10 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 			friendship.receiver_id 
 		FROM users LEFT JOIN friendship 
 		ON (users.id = friendship.sender_id AND friendship.receiver_id = ?) OR (users.id = friendship.receiver_id AND friendship.sender_id = ?) 
-		WHERE name LIKE ?
+		WHERE name LIKE ? AND users.id <> ?
 		`;
 	console.log(searchQuery);
-	const [search_result] = await connection.execute(searchQuery, [my_id, my_id, keyword]);
+	const [search_result] = await connection.execute(searchQuery, [my_id, my_id, keyword, my_id]);
 	console.log(search_result);
 
 
