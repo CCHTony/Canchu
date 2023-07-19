@@ -255,7 +255,7 @@ router.get('/:id', verifyAccesstoken, async (req, res) => {
 	`
 	SELECT 
 		comments.id,
-		DATE_FORMAT(CONVERT_TZ(comments.created_at, '+00:00', '+08:00'), '%Y-%m-%d %H:%i:%s'),
+		DATE_FORMAT(CONVERT_TZ(comments.created_at, '+00:00', '+08:00'), '%Y-%m-%d %H:%i:%s') AS created_at,
 		comments.content,
 		users.id AS user_id,
 		users.name,
