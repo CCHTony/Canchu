@@ -29,9 +29,10 @@ router.put('/:id', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
 	const post_id = req.params.id;
 	const context = req.body.context;
+	const my_id = req.decoded.id
 
-	let mysQuery = 'UPDATE posts set context = ? where id = ? AND poster_id = ? ';
-	const [update] = await connection.execute(mysQuery, [context, post_id]);
+	const updateQuery = 'UPDATE posts set context = ? where id = ? AND poster_id = ? ';
+	const [update] = await connection.execute(updateQuery, [context, post_id, my_id]);
 	console.log(update);
 	if (update.affectedRows === 0) {
 		// Not poster or post does not exist
