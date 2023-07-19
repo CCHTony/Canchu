@@ -282,6 +282,7 @@ router.get('/:id', verifyAccesstoken, async (req, res) => {
 		data: {
 			post: {
 				id: post.postId,
+				user_id: post.user_id,
 				created_at: post.created_at,
 				context: post.context,
 				is_liked: isLiked,
@@ -293,7 +294,7 @@ router.get('/:id', verifyAccesstoken, async (req, res) => {
 			},
 		},
 	};
-	res.json(response);
+	return res.json(response);
 });
 
 
