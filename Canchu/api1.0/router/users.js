@@ -199,7 +199,7 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 	
 	let friendship = null;
 	console.log(my_id);
-	console.log(user_id);
+	console.log({user:user_id});
 	console.log(result);
 	if(my_id !== user_id){
 		if(result.friendship_id){
