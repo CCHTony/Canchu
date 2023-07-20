@@ -8,6 +8,7 @@ const multer = require('multer');
 
 // create the connection nod to database
 const connectionPromise = require('../models/mysql').connectionPromise;
+const client = require('../models/redis').client;
 const verifyAccesstoken = require('../models/function').verifyAccesstoken;
 
 const storage = multer.diskStorage({
@@ -172,6 +173,7 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
 	const user_id = Number(req.params.id);
 	const my_id = req.decoded.id;
+	const redisKey = `profile_${my_id}_${user_id}`;
 
 	const profilelQuery = 
 	`
@@ -283,7 +285,7 @@ router.put('/picture', verifyAccesstoken, upload.single('picture'), async (req, 
 		const url = `https://52.64.240.159/${picture.filename}`
 		response = {
 			data: {
-				picture: url
+				url: url
 			}
 		}
 		return res.json(response);
@@ -315,7 +317,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 		ON (users.id = friendship.sender_id AND friendship.receiver_id = ?) OR (users.id = friendship.receiver_id AND friendship.sender_id = ?) 
 		WHERE name LIKE ? AND users.id <> ?
 	`;
-	
+
 	try{
 		const [search_result] = await connection.execute(searchQuery, [my_id, my_id, keyword, my_id]);
 
