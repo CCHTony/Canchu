@@ -20,18 +20,16 @@ function verifyAccesstoken(req, res, next) {
 	next();
 }
 
-async function redisSearch(key){
-	const cachedResult = await client.get(input.toString());
-
-  if (cachedResult !== null) {
-    console.log('从缓存中获取结果...');
-    return JSON.parse(cachedResult);
-  } else {
-    const result = await expensiveCalculation(input);
-    console.log('将结果存入缓存...');
-    await client.set(input.toString(), JSON.stringify(result));
-    return result;
-  }
+function redisSearch(key){
+  redis.get(key, (err, result) => {
+		if (err) {
+			console.error(err);
+			return res.status(500).json({ error: "Server Error." });
+		} else {
+			const cachedResult = JSON.parse(result)
+			return(cachedResult);
+		}
+	});
 } 
 
 

@@ -269,8 +269,8 @@ router.put('/profile', verifyAccesstoken, async (req, res) => {
 		return res.json(response);
 	}
 	catch(err){
-		res.status(500).json({ error: "Server Error." });
 		console.log(err);
+		return res.status(500).json({ error: "Server Error." });
 	}
 });
 
