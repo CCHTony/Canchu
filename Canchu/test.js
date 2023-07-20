@@ -28,12 +28,14 @@ redis.get("key", (err, result) => {
   if (err) {
     console.error(err);
   } else {
+    console.log('1')
     console.log(result); // Prints "value"
   }
 });
 
 // Or ioredis returns a promise if the last argument isn't a function
 redis.get("mykey").then((result) => {
+  console.log('2')
   console.log(result); // Prints "value"
 });
 
@@ -49,4 +51,5 @@ function redisSearch(key){
 	});
 } 
 
+console.log('3')
 console.log(redisSearch('mykey'));
