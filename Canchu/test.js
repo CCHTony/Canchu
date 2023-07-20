@@ -75,12 +75,12 @@ async function main(){
   });
 
   console.log('3')
-  const abc = await redisSearch('mykey');
-  console.log(abc);
   await redisDelete('mykey');
  
   const efg = await redisSet('mykey', ob);
   console.log(efg);
+  const abc = await redisSearch('mykey');
+  console.log(abc);
   
 }
 
