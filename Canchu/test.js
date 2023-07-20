@@ -67,8 +67,13 @@ async function main(){
   console.log('3')
   const abc = await redisSearch('mykey');
   console.log(abc);
-  const efg = await redisDelete('mykey');
-  console.log(efg);
+  await redisDelete('mykey');
+  await redis.get("mykey").then((result) => {
+    console.log('2')
+    console.log(result);
+    console.log(typeof(result)) // Prints "value"
+  });
+  
 }
 
 main()
