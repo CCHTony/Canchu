@@ -32,17 +32,16 @@ async function redisSearch(key){
   }
 }
 
-async function redisdelete(key){
+async function redisDelete(key) {
   try {
-    const result = await redis.get(key);
-    const cachedResult = JSON.parse(result);
-    return cachedResult;
-  } 
-  catch (err) {
+    const result = await redis.del(key); 
+    return result; 
+  } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: "Server Error." });
+    return res.status(500).json({ error: "Server Error." }); 
   }
 }
+
 
 
 

@@ -42,6 +42,16 @@ async function redisDelete(key) {
   }
 }
 
+async function redisSet(key, value) {
+  try {
+    const result = await redis.set(key, JSON.stringify(value)); 
+    return result; 
+  } 
+	catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Server Error." }); 
+  }
+}
 
 
 async function main(){
@@ -68,11 +78,9 @@ async function main(){
   const abc = await redisSearch('mykey');
   console.log(abc);
   await redisDelete('mykey');
-  await redis.get("mykey").then((result) => {
-    console.log('2')
-    console.log(result);
-    console.log(typeof(result)) // Prints "value"
-  });
+ 
+  const efg = await redisSet('mykey', ob);
+  console.log(efg);
   
 }
 
