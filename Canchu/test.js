@@ -53,7 +53,7 @@ async function main(){
   });
 
   console.log('3')
-  const abc = redisSearch('mykey');
+  const abc = await redisSearch('mykey');
   console.log(abc);
 }
 
