@@ -1,18 +1,28 @@
-const redis = require('redis');
+// Import ioredis.
+// You can also use `import { Redis } from "ioredis"`
+// if your project is a TypeScript project,
+// Note that `import Redis from "ioredis"` is still supported,
+// but will be deprecated in the next major version.
+const Redis = require("ioredis");
 
-const redisOptions = {
-  host: 'localhost', // Redis服务器的主机地址
-  port: 6379, // Redis服务器的端口号
-};
+// Create a Redis instance.
+// By default, it will connect to localhost:6379.
+// We are going to cover how to specify connection options soon.
+const redis = new Redis();
 
-const client = redis.createClient(redisOptions);
+redis.set("mykey", "value"); // Returns a promise which resolves to "OK" when the command succeeds.
 
-client.on('error', err => console.log('Redis Client Error', err));
+// ioredis supports the node.js callback style
+redis.get("mykey", (err, result) => {
+  if (err) {
+    console.error(err);
+  } else {
+    console.log(result); // Prints "value"
+  }
+});
 
-async function main(){
-  await client.connect();
-  const value = await client.get('foo');
-  console.log(value);
-}
+// Or ioredis returns a promise if the last argument isn't a function
+redis.get("mykey").then((result) => {
+  console.log(result); // Prints "value"
+});
 
-main();
