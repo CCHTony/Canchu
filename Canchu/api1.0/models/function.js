@@ -36,7 +36,19 @@ async function redisDelete(key) {
   try {
     const result = await redis.del(key); 
     return result; 
-  } catch (err) {
+  } 
+	catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Server Error." }); 
+  }
+}
+
+async function redisSet(key, value) {
+  try {
+    const result = await redis.set(key, JSON.stringify(value)); 
+    return result; 
+  } 
+	catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Server Error." }); 
   }
@@ -49,5 +61,7 @@ async function redisDelete(key) {
 
 module.exports = {
 	verifyAccesstoken,
-	redisSearch
+	redisSearch,
+	redisDelete,
+	redisSet
 };

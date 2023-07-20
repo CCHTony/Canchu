@@ -9,6 +9,8 @@ const multer = require('multer');
 // create the connection nod to database
 const connectionPromise = require('../models/mysql').connectionPromise;
 const redisSearch = require('../models/function').redisSearch;
+const redisDelete = require('../models/function').redisDelete;
+const redisSet = require('../models/function').redisSet;
 const verifyAccesstoken = require('../models/function').verifyAccesstoken;
 
 const storage = multer.diskStorage({
@@ -173,9 +175,11 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
 	const user_id = Number(req.params.id);
 	const my_id = req.decoded.id;
-	const user_key = `profile_${user_id}`;
+	const profile_key = `profile_${user_id}`;
+	const friendship_key = `friendship_${my_id}_${user_id}`;
+	let friendship = null;
 
-	const profilelQuery = 
+	const Query = 
 	`
 	SELECT
 		users.id,
@@ -197,52 +201,104 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 	ON (sender_id = users.id OR receiver_id = users.id) AND (sender_id = ? OR receiver_id = ?)
 	WHERE users.id = ?
 	`;
-	try{
-		const result = (await connection.execute(profilelQuery, [my_id, my_id, user_id]))[0][0];
-	
-		let friendship = null;
-		console.log(my_id);
-		console.log({user:user_id});
-		console.log(result);
-		if(my_id !== user_id){
-			if(result.friendship_id){
-				if (result.status === 1) {
-					friendship = {
-						id: result.friendship_id,
-						status:'friend',
-					};
+	const profile_cachedResult = await redisSearch(profile_key);
+	const friendship_cachedResult = await redisSearch(friendship_key);
+
+	if(profile_cachedResult !== null && friendship_cachedResult !== null){
+		const response = {
+			data: {
+				user: {
+					id: profile_cachedResult.id,
+					name: profile_cachedResult.name,
+					picture: profile_cachedResult.picture,
+					friend_count: profile_cachedResult.friend_count,
+					introduction: profile_cachedResult.introduction,
+					tags: profile_cachedResult.tags,
+					friendship: friendship_cachedResult.friendship,
 				}
-				else{
-					if (result.sender_id === my_id) {
+			}
+		};
+		return res.json(response);
+	}
+
+	try{
+		const result = (await connection.execute(Query, [my_id, my_id, user_id]))[0][0];
+
+		if(friendship_cachedResult !== null){
+			friendship = friendship_cachedResult.friendship;
+		}
+		else{
+			if(my_id !== user_id){
+				if(result.friendship_id){
+					if (result.status === 1) {
 						friendship = {
 							id: result.friendship_id,
-							status: 'requested',
+							status:'friend',
 						};
 					}
-					else {
-						friendship = {
-							id: result.friendship_id,
-							status: 'pending',
-						};
+					else{
+						if (result.sender_id === my_id) {
+							friendship = {
+								id: result.friendship_id,
+								status: 'requested',
+							};
+						}
+						else {
+							friendship = {
+								id: result.friendship_id,
+								status: 'pending',
+							};
+						}
 					}
 				}
 			}
 		}
 		
-		const response = {
-			data: {
-				user: {
-					id: user_id,
-					name: result.name,
-					picture: result.picture,
-					friend_count: result.friend_count,
-					introduction: result.intro,
-					tags: result.tags,
-					friendship: friendship,
+		if(profile_cachedResult !== null){
+			const response = {
+				data: {
+					user: {
+						id: profile_cachedResult.id,
+						name: profile_cachedResult.name,
+						picture: profile_cachedResult.picture,
+						friend_count: profile_cachedResult.friend_count,
+						introduction: profile_cachedResult.introduction,
+						tags: profile_cachedResult.tags,
+						friendship: friendship,
+					}
 				}
+			};
+			return res.json(response);
+		}
+		else{
+			const response = {
+				data: {
+					user: {
+						id: user_id,
+						name: result.name,
+						picture: result.picture,
+						friend_count: result.friend_count,
+						introduction: result.intro,
+						tags: result.tags,
+						friendship: friendship,
+					}
+				}
+			};
+			const profile_info = {
+				id: user_id,
+				name: result.name,
+				picture: result.picture,
+				friend_count: result.friend_count,
+				introduction: result.intro,
+				tags: result.tags,
 			}
-		};
-		return res.json(response);
+			const friendship_info = {
+				friendship: friendship,
+			}
+			await redisSet(profile_key, profile_info);
+			await redisSet(profile_key, friendship_info);
+			return res.json(response);
+		}
 	}
 	catch(err){
 		res.status(500).json({ error: "Server Error." });
