@@ -20,17 +20,32 @@ function verifyAccesstoken(req, res, next) {
 	next();
 }
 
-function redisSearch(key){
-  redis.get(key, (err, result) => {
-		if (err) {
-			console.error(err);
-			return res.status(500).json({ error: "Server Error." });
-		} else {
-			const cachedResult = JSON.parse(result)
-			return(cachedResult);
-		}
-	});
-} 
+async function redisSearch(key){
+  try {
+    const result = await redis.get(key);
+    const cachedResult = JSON.parse(result);
+    return cachedResult;
+  } 
+  catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Server Error." });
+  }
+}
+
+async function redisdelete(key){
+  try {
+    const result = await redis.get(key);
+    const cachedResult = JSON.parse(result);
+    return cachedResult;
+  } 
+  catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Server Error." });
+  }
+}
+
+
+
 
 
 module.exports = {

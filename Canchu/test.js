@@ -31,6 +31,18 @@ async function redisSearch(key){
   }
 }
 
+async function redisDelete(key) {
+  try {
+    const result = await redis.del(key); 
+    console.log(result);
+    return result; 
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Server Error." }); // 如果发生异常，返回服务器错误信息
+  }
+}
+
+
 
 async function main(){
   redis.set("mykey", JSON.stringify(ob, null, 2)); 
@@ -55,6 +67,8 @@ async function main(){
   console.log('3')
   const abc = await redisSearch('mykey');
   console.log(abc);
+  const efg = await redisDelete('mykey');
+  console.log(efg);
 }
 
 main()

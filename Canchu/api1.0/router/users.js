@@ -8,7 +8,7 @@ const multer = require('multer');
 
 // create the connection nod to database
 const connectionPromise = require('../models/mysql').connectionPromise;
-const redis = require('../models/redis').redis;
+const redisSearch = require('../models/function').redisSearch;
 const verifyAccesstoken = require('../models/function').verifyAccesstoken;
 
 const storage = multer.diskStorage({
@@ -173,7 +173,7 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
 	const user_id = Number(req.params.id);
 	const my_id = req.decoded.id;
-	const redisKey = `profile_${my_id}_${user_id}`;
+	const user_key = `profile_${user_id}`;
 
 	const profilelQuery = 
 	`
