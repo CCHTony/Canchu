@@ -19,10 +19,6 @@ const ob = {
   b:'123'
 }
 
-
-
-
-
 async function redisSearch(key){
   await redis.get(key, (err, result) => {
 		if (err) {
@@ -58,7 +54,8 @@ async function main(){
   });
 
   console.log('3')
-  console.log(redisSearch('mykey'));
+  const abc = await redisSearch('mykey');
+  console.log(abc);
 }
 
 main()
