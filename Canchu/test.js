@@ -24,7 +24,7 @@ const ob = {
 
 
 async function redisSearch(key){
-  redis.get(key, (err, result) => {
+  await redis.get(key, (err, result) => {
 		if (err) {
 			console.error(err);
 			return res.status(500).json({ error: "Server Error." });
@@ -32,6 +32,7 @@ async function redisSearch(key){
     else {
 			const cachedResult = JSON.parse(result)
       console.log(cachedResult);
+      console.log('123')
 			return(cachedResult);
 		}
 	});
