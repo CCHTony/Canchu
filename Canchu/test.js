@@ -58,7 +58,7 @@ async function main(){
   });
 
   console.log('3')
-  console.log(await redisSearch('mykey'));
+  console.log(redisSearch('mykey'));
 }
 
 main()
