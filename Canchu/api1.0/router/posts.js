@@ -99,20 +99,26 @@ router.post('/:id/comment', verifyAccesstoken, async (req, res) => {
 	const my_id = req.decoded.id;
 	const content = req.body.content;
 
-	let postQuery = 'INSERT INTO comments (post_id, user_id, created_at, content) VALUES (?, ?, NOW(), ?)';
-	const [comment] = await connection.execute(postQuery, [post_id, my_id, content]);
-	console.log(comment);
-	const response = {
-		"data": {
-			"post": {
-				"id": post_id
-			},
-			"comment": {
-				"id": comment.insertId
+	try{
+		const postQuery = 'INSERT INTO comments (post_id, user_id, created_at, content) VALUES (?, ?, NOW(), ?)';
+		const [comment] = await connection.execute(postQuery, [post_id, my_id, content]);
+		console.log(comment);
+		const response = {
+			"data": {
+				"post": {
+					"id": post_id
+				},
+				"comment": {
+					"id": comment.insertId
+				}
 			}
 		}
+		res.json(response);
 	}
-	res.json(response);
+	catch(err){
+		res.status(500).json({ error: "Server Error." });
+		console.log(err);
+	}
 });
 
 

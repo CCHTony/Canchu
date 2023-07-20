@@ -8,7 +8,7 @@ const multer = require('multer');
 
 // create the connection nod to database
 const connectionPromise = require('../models/mysql').connectionPromise;
-
+const redis = require('../models/redis').redis;
 const verifyAccesstoken = require('../models/function').verifyAccesstoken;
 
 const storage = multer.diskStorage({
