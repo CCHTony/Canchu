@@ -20,19 +20,17 @@ const ob = {
 }
 
 async function redisSearch(key){
-  return await redis.get(key, async(err, result) => {
-		if (err) {
-			console.error(err);
-			return res.status(500).json({ error: "Server Error." });
-		} 
-    else {
-			const cachedResult = JSON.parse(result)
-      console.log(cachedResult);
-      console.log('123')
-			return(cachedResult);
-		}
-	});
+  try {
+    const result = await redis.get(key);
+    const cachedResult = JSON.parse(result);
+    return cachedResult;
+  } 
+  catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Server Error." });
+  }
 }
+
 
 async function main(){
   redis.set("mykey", JSON.stringify(ob, null, 2)); 
@@ -55,8 +53,8 @@ async function main(){
   });
 
   console.log('3')
-  const abc = await redisSearch('mykey');
-  console.log(typeof(abc));
+  const abc = redisSearch('mykey');
+  console.log(abc);
 }
 
 main()
