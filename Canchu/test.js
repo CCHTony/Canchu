@@ -23,13 +23,15 @@ const ob = {
 
 
 
-function redisSearch(key){
-  redis.get(key, (err, result) => {
+async function redisSearch(key){
+  await redis.get(key, (err, result) => {
 		if (err) {
 			console.error(err);
 			return res.status(500).json({ error: "Server Error." });
-		} else {
+		} 
+    else {
 			const cachedResult = JSON.parse(result)
+      console.log(cachedResult);
 			return(cachedResult);
 		}
 	});
@@ -39,7 +41,7 @@ async function main(){
   redis.set("mykey", JSON.stringify(ob, null, 2)); 
 
   // ioredis supports the node.js callback style
-  redis.get("key", (err, result) => {
+  await redis.get("key", (err, result) => {
     if (err) {
       console.error(err);
     } else {
@@ -49,12 +51,13 @@ async function main(){
   });
 
   // Or ioredis returns a promise if the last argument isn't a function
-  redis.get("mykey").then((result) => {
+  await redis.get("mykey").then((result) => {
     console.log('2')
     console.log(result); // Prints "value"
   });
+
   console.log('3')
-  console.log(await redisSearch('mykey'));
+  console.log(redisSearch('mykey'));
 }
 
 main()
