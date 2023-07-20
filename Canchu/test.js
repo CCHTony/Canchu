@@ -20,7 +20,7 @@ const ob = {
 }
 
 async function redisSearch(key){
-  await redis.get(key, (err, result) => {
+  return await redis.get(key, (err, result) => {
 		if (err) {
 			console.error(err);
 			return res.status(500).json({ error: "Server Error." });
