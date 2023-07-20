@@ -9,8 +9,11 @@ const client = redis.createClient(redisOptions);
 
 client.on('error', err => console.log('Redis Client Error', err));
 
-await client.connect();
+async function main(){
+  await client.connect();
+  await client.set('foo', 'bar');
+  const value = await client.get('foo');
+  console.log(value);
+}
 
-await client.set('foo', 'bar');
-const value = await client.get('foo');
-console.log(value);
+main();
