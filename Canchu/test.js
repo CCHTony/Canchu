@@ -50,12 +50,13 @@ async function main(){
   // Or ioredis returns a promise if the last argument isn't a function
   await redis.get("mykey").then((result) => {
     console.log('2')
-    console.log(result); // Prints "value"
+    console.log(result);
+    console.log(typeof(result)) // Prints "value"
   });
 
   console.log('3')
   const abc = await redisSearch('mykey');
-  console.log(abc);
+  console.log(typeof(abc));
 }
 
 main()
