@@ -1,8 +1,3 @@
-// Import ioredis.
-// You can also use `import { Redis } from "ioredis"`
-// if your project is a TypeScript project,
-// Note that `import Redis from "ioredis"` is still supported,
-// but will be deprecated in the next major version.
 const Redis = require("ioredis");
 
 // Create a Redis instance.
@@ -11,7 +6,9 @@ const Redis = require("ioredis");
 const redis = new Redis({
   port: 6379, // Redis port
   host: "localhost", // Redis host
-  db: 0, // Database 0
+  username: "default", // needs Redis >= 6
+  password: "my-top-secret",
+  db: 0, // Defaults to 0
 });
 
 redis.set("mykey", "value"); // Returns a promise which resolves to "OK" when the command succeeds.
