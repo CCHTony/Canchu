@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const client = require('../models/redis').client;
+
 
 function verifyAccesstoken(req, res, next) {
 	let token = req.headers.authorization;
@@ -19,22 +19,6 @@ function verifyAccesstoken(req, res, next) {
 	}
 	next();
 }
-
-async function getCachedResult(input) {
-	const cachedResult = await client.get(input);
-
-	if (cachedResult !== null) {
-		console.log('get data from cache...');
-    console.log(cachedResult);
-		return JSON.parse(cachedResult);
-	} else {
-		const result = await expensiveCalculation(input);
-		console.log('save to cache...');
-		await client.set(input, JSON.stringify(result));
-		return result;
-	}
-}
-
 
 
 module.exports = {
