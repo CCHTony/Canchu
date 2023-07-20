@@ -45,7 +45,7 @@ async function redisDelete(key) {
 
 async function redisSet(key, value) {
   try {
-    const result = await redis.set(key, JSON.stringify(value)); 
+    const result = await redis.set(key, JSON.stringify(value, null, 2)); 
     return result; 
   } 
 	catch (err) {

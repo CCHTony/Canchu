@@ -296,7 +296,7 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 				friendship: friendship,
 			}
 			await redisSet(profile_key, profile_info);
-			await redisSet(profile_key, friendship_info);
+			await redisSet(friendship_key, friendship_info);
 			return res.json(response);
 		}
 	}
