@@ -285,7 +285,7 @@ router.put('/picture', verifyAccesstoken, upload.single('picture'), async (req, 
 		const url = `https://52.64.240.159/${picture.filename}`
 		response = {
 			data: {
-				url: url
+				picture: url
 			}
 		}
 		return res.json(response);
