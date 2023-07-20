@@ -280,9 +280,9 @@ router.put('/picture', verifyAccesstoken, upload.single('picture'), async (req, 
 	const id = req.decoded.id;
 	const picture = req.file;
 	try{
+		const url = `https://52.64.240.159/${picture.filename}`;
 		const updateQuery = 'UPDATE users SET picture = ? WHERE id = ?';
 		const [rows] = await connection.execute(updateQuery, [url, id]);
-		const url = `https://52.64.240.159/${picture.filename}`
 		response = {
 			data: {
 				picture: url
