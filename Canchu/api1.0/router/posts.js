@@ -1,4 +1,5 @@
 const express = require('express');
+const { redisSearch, redisSet } = require('../models/function');
 const router = express.Router();
 
 // create the connection nod to database
@@ -128,11 +129,12 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 	let search_id = req.query.user_id;
 	let cursor = req.query.cursor;
 	const my_id = req.decoded.id;
-
+	let post_key = `post_${my_id}`;
 
 	let postIdCursor = 18446744073709551615n;
   if (cursor) {
     postIdCursor = Number.parseInt(atob(cursor));
+		post_key += `_${postIdCursor}`
   }
 
 	//initialize MySQL query 
@@ -173,6 +175,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 	else{
 		condition = `WHERE users.id = ? AND posts.id <= ? `;
 		param = [my_id, search_id, postIdCursor];
+		post_key += `_${search_id}`;
 	}
 
 	const suffix = 
@@ -183,8 +186,11 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 	`;
 
 	postQuery += (condition + suffix);
-	console.log(postQuery);
 	// Get post details
+	const postCached_result = redisSearch(post_key);
+	if(postCached_result){
+		return res.json(postCached_result);
+	}
 	let [posts] = await connection.execute(postQuery, param);
 	console.log(posts);
 
@@ -210,14 +216,13 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
     name: post.name
   }));
 
-
 	 const response = {
     data: {
       posts: formattedPosts,
       next_cursor: encodedNextCursor
     }
   };
-
+	await redisSet(post_key, response)
   return res.json(response);
 });
 

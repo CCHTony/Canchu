@@ -223,82 +223,58 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 
 	try{
 		const result = (await connection.execute(Query, [my_id, my_id, user_id]))[0][0];
-
-		if(friendship_cachedResult !== null){
-			friendship = friendship_cachedResult.friendship;
-		}
-		else{
-			if(my_id !== user_id){
-				if(result.friendship_id){
-					if (result.status === 1) {
+		if(my_id !== user_id){
+			if(result.friendship_id){
+				if (result.status === 1) {
+					friendship = {
+						id: result.friendship_id,
+						status:'friend',
+					};
+				}
+				else{
+					if (result.sender_id === my_id) {
 						friendship = {
 							id: result.friendship_id,
-							status:'friend',
+							status: 'requested',
 						};
 					}
-					else{
-						if (result.sender_id === my_id) {
-							friendship = {
-								id: result.friendship_id,
-								status: 'requested',
-							};
-						}
-						else {
-							friendship = {
-								id: result.friendship_id,
-								status: 'pending',
-							};
-						}
+					else {
+						friendship = {
+							id: result.friendship_id,
+							status: 'pending',
+						};
 					}
 				}
 			}
 		}
-		
-		if(profile_cachedResult !== null){
-			const response = {
-				data: {
-					user: {
-						id: profile_cachedResult.id,
-						name: profile_cachedResult.name,
-						picture: profile_cachedResult.picture,
-						friend_count: profile_cachedResult.friend_count,
-						introduction: profile_cachedResult.introduction,
-						tags: profile_cachedResult.tags,
-						friendship: friendship,
-					}
+
+		const response = {
+			data: {
+				user: {
+					id: user_id,
+					name: result.name,
+					picture: result.picture,
+					friend_count: result.friend_count,
+					introduction: result.intro,
+					tags: result.tags,
+					friendship: friendship,
 				}
-			};
-			return res.json(response);
-		}
-		else{
-			const response = {
-				data: {
-					user: {
-						id: user_id,
-						name: result.name,
-						picture: result.picture,
-						friend_count: result.friend_count,
-						introduction: result.intro,
-						tags: result.tags,
-						friendship: friendship,
-					}
-				}
-			};
-			const profile_info = {
-				id: user_id,
-				name: result.name,
-				picture: result.picture,
-				friend_count: result.friend_count,
-				introduction: result.intro,
-				tags: result.tags,
 			}
-			const friendship_info = {
-				friendship: friendship,
-			}
-			await redisSet(profile_key, profile_info);
-			await redisSet(friendship_key, friendship_info);
-			return res.json(response);
+		};
+		const profile_info = {
+			id: user_id,
+			name: result.name,
+			picture: result.picture,
+			friend_count: result.friend_count,
+			introduction: result.intro,
+			tags: result.tags,
 		}
+		const friendship_info = {
+			friendship: friendship,
+		}
+		await redisSet(profile_key, profile_info);
+		await redisSet(friendship_key, friendship_info);
+		return res.json(response);
 	}
 	catch(err){
 		res.status(500).json({ error: "Server Error." });
@@ -310,6 +286,7 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 router.put('/profile', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
 	const id = req.decoded.id;
+	const profile_key = `profile_${id}`;
 	const { name, introduction, tags } = req.body;
 
 	try{
@@ -322,6 +299,7 @@ router.put('/profile', verifyAccesstoken, async (req, res) => {
 				}
 			}
 		};
+		await redisDelete(profile_key);
 		return res.json(response);
 	}
 	catch(err){
@@ -335,6 +313,7 @@ router.put('/picture', verifyAccesstoken, upload.single('picture'), async (req, 
 	const connection = await connectionPromise;
 	const id = req.decoded.id;
 	const picture = req.file;
+	const profile_key = `profile_${id}`;
 	try{
 		const url = `https://52.64.240.159/${picture.filename}`;
 		const updateQuery = 'UPDATE users SET picture = ? WHERE id = ?';
@@ -344,6 +323,7 @@ router.put('/picture', verifyAccesstoken, upload.single('picture'), async (req, 
 				picture: url
 			}
 		}
+		await redisDelete(profile_key);
 		return res.json(response);
 	}
 	catch(err){
