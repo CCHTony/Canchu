@@ -14,10 +14,7 @@ const redis = new Redis({
   db: 0, // Database 0
 });
 
-const ob = {
-  a:123,
-  b:'123'
-}
+const ob = [1,2,3]
 
 async function redisSearch(key){
   try {
