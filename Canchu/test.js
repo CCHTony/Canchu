@@ -77,7 +77,7 @@ async function main(){
   const efg = await redisSet('mykey', ob);
   console.log(efg);
   const abc = await redisSearch('mykey');
-  console.log(abc);
+  console.log(abc[1]);
   
 }
 
