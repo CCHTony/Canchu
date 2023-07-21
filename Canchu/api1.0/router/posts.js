@@ -131,6 +131,8 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 	const my_id = req.decoded.id;
 	let postSeries_key = null;
 	let postKeyArr = new Array(10);
+	let postArr = new Array(10);
+	let dismatch = false;
 
 	let postIdCursor = 18446744073709551615n;
   if (cursor) {
@@ -191,7 +193,11 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 	const postSeries_result = await redisSearch(postSeries_key);
 	if(postSeries_result){
 		for(let i = 0; i < 10; i++){
-			postKeyArr[i] = `post_${}`
+			postKeyArr[i] = `post_${my_id}_${postSeries_result[i]}`;
+			postArr[i] = await redisSearch(postKeyArr[i]);
+			if(postArr[i] == null ){
+				dismatch = true;
+			}
 		}
 	}
 	if(postCached_result){
