@@ -134,7 +134,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 	let postIdCursor = 18446744073709551615n;
   if (cursor) {
     postIdCursor = Number.parseInt(atob(cursor));
-		post_key += `_${postIdCursor}`
+		post_key += `_${postIdCursor}`;
   }
 
 	//initialize MySQL query 
@@ -187,7 +187,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 
 	postQuery += (condition + suffix);
 	// Get post details
-	const postCached_result = redisSearch(post_key);
+	const postCached_result = await redisSearch(post_key);
 	if(postCached_result){
 		return res.json(postCached_result);
 	}
