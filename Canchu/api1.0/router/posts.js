@@ -151,6 +151,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
   if (cursor) {
     postIdCursor = Number.parseInt(atob(cursor));
   }
+	console.log(postIdCursor);
 
 	//initialize MySQL query 
 	let param = [];
