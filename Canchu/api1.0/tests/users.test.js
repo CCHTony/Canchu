@@ -3,7 +3,7 @@ const express = require('express'); // 引入 Express 框架
 const app = express(); // 创建 Express 应用
 
 // 引入 router 文件，注意这里需要修改文件路径
-const router = require('../path/to/router-file');
+const router = require('../router/users');
 
 // 将路由添加到应用中
 app.use('/', router);
