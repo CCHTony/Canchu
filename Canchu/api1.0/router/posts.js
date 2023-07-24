@@ -200,7 +200,6 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 		for(let i = 0; i < order.length; i++){
 			postKeyArr[i] = `post_${order[i]}`;
 			postArr[i] = await redisSearch(postKeyArr[i]);
-			console.log(postArr[i]);
 			if(!postArr[i]){
 				console.log('postArr problem');
 				dismatch = true;
