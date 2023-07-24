@@ -35,6 +35,7 @@ async function redisSearch(key){
 async function redisDelete(key) {
   try {
     const result = await redis.del(key); 
+    console.log(`redis Delete:${key}`)
     return result; 
   } 
 	catch (err) {
@@ -46,6 +47,7 @@ async function redisDelete(key) {
 async function redisSet(key, value) {
   try {
     const result = await redis.set(key, JSON.stringify(value, null, 2)); 
+    console.log(`redis SET:${key} ${value}`)
     return result; 
   } 
 	catch (err) {
