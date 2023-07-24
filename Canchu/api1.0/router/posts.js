@@ -202,6 +202,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 			postArr[i] = await redisSearch(postKeyArr[i]);
 			console.log(postArr[i]);
 			if(!postArr[i]){
+				console.log(1);
 				dismatch = true;
 				break;
 			}
