@@ -1,56 +1,64 @@
-const express = require('express');
-const router = express.Router();
+// 引入所需的模組和套件
+const express = require('express'); // 引入 Express 框架
+const router = express.Router(); // 建立 Express 路由器
+const jwt = require('jsonwebtoken'); // 引入 JSON Web Token 套件，用於處理身份驗證
+const crypto = require('crypto'); // 引入 crypto 套件，用於加密處理
+const multer = require('multer'); // 引入 multer 套件，用於處理上傳檔案
 
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
-const multer = require('multer');
-
-
-// create the connection nod to database
+// 引入資料庫連線
 const connectionPromise = require('../models/mysql').connectionPromise;
+// 引入 Redis 相關函式
 const redisSearch = require('../models/function').redisSearch;
 const redisDelete = require('../models/function').redisDelete;
 const redisSet = require('../models/function').redisSet;
+// 引入驗證 Access Token 的函式
 const verifyAccesstoken = require('../models/function').verifyAccesstoken;
 
+// 設定 multer 的存儲方式和目的地
 const storage = multer.diskStorage({
-	destination: function (req, file, cb) {
-		cb(null, 'public')
-	},
-	filename: function (req, file, cb) {
-		const uniqueSuffix = Date.now()
-		cb(null, file.fieldname + '-' + uniqueSuffix + '.jpg')
-	}
-})
-const upload = multer({ storage: storage })
+  destination: function (req, file, cb) {
+    cb(null, 'public')
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now()
+    cb(null, file.fieldname + '-' + uniqueSuffix + '.jpg')
+  }
+});
+const upload = multer({ storage: storage });
 
-
+// 使用者註冊 API
 router.post('/signup', async (req, res) => {
 	const connection = await connectionPromise;
 	try {
 		const { name, email, password } = req.body;
+
+		// 檢查必填欄位是否都有輸入
 		if (!name || !password || !email) {
 			return res.status(400).json({ error: 'All fields (name, email, password) must be entered.' });
 		}
 
+		// 檢查 email 格式是否正確
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailRegex.test(email)) {
 			return res.status(400).json({ error: 'Invalid email address.' });
 		}
 
+		// 檢查是否已經有相同的 email 註冊過
 		let userQuery = 'SELECT email FROM users WHERE email = ?';
 		const [rows] = await connection.execute(userQuery, [email]);
 		if (rows.length != 0) {
 			return res.status(403).json({ error: 'It should not be possible to register with a duplicate email.' });
 		}
 
-		// 使用 crypto 加密
+		// 使用 crypto 加密密碼
 		const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
 
+		// 執行註冊的 SQL 查詢
 		let signupQuery = 'INSERT INTO users(name, email, password, picture, provider) VALUES(?,?,?,?,?)';
 		const [results] = await connection.execute(signupQuery, [name, email, hashedPassword, null, 'native']);
 		let id = results.insertId;
 
+		// 創建用於 JWT 的 payload
 		const payload = {
 			"id": id,
 			"name": name,
@@ -59,6 +67,7 @@ router.post('/signup', async (req, res) => {
 			"picture": null
 		};
 
+		// 創建包含註冊資訊和 JWT 的回應
 		const response = {
 			'data': {
 				'access_token': jwt.sign(payload, process.env.SECRETKEY, { expiresIn: '1 day' }),
@@ -74,40 +83,49 @@ router.post('/signup', async (req, res) => {
 		res.json(response);
 	}
 	catch (err) {
+		// 若有任何錯誤，回傳伺服器錯誤並顯示錯誤訊息在後端
 		res.status(500).json({ error: "Server Error." });
 		console.log(err);
 	}
 });
 
-
+// 使用者登入 API
 router.post('/signin', async (req, res) => {
 	const connection = await connectionPromise;
 	try {
 		const provider = req.body.provider;
+
+		// 檢查是否提供了 provider 參數
 		if (!provider) {
 			return res.status(400).json({ error: 'All fields must be entered.' });
 		}
 
 		if (provider === 'native') {
+			// 如果使用本地登入方式
 			const email = req.body.email;
 			const password = req.body.password;
 
+			// 檢查必填欄位是否都有輸入
 			if (!email || !password) {
 				return res.status(400).json({ error: 'All fields must be entered.' });
 			}
 
+			// 查詢使用者是否存在
 			const signinQuery = 'SELECT * FROM users WHERE email = ?';
 			const [is_exist] = await connection.execute(signinQuery, [email]);
 			if (is_exist.length === 0) {
 				return res.status(403).json({ error: 'User Not Found' })
 			}
 
+			// 驗證密碼是否正確
 			const user = is_exist[0];
 			const PASSWORD = user.password;
 			const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
 			if (PASSWORD !== hashedPassword) {
 				return res.status(403).json({ error: 'Wrong Password' });
 			}
+
+			// 產生 JWT 的 payload
 			const id = user.id;
 			const name = user.name;
 			const picture = user.picture;
@@ -118,6 +136,8 @@ router.post('/signin', async (req, res) => {
 				"provider": 'native',
 				"picture": picture
 			};
+
+			// 回傳登入成功的回應，包含 JWT 和使用者資訊
 			const response = {
 				'data': {
 					'access_token': jwt.sign(payload, process.env.SECRETKEY, { expiresIn: '1 day' }),
@@ -133,19 +153,28 @@ router.post('/signin', async (req, res) => {
 			res.json(response);
 		}
 		else if (provider === 'facebook') {
+			// 如果使用 Facebook 登入方式
 			const access_token = req.body.access_token;
+
+			// 使用 access_token 向 Facebook API 取得使用者資訊
 			const url = `https://graph.facebook.com/v17.0/me?fields=id,name,email,picture{url}&access_token=${access_token}`;
 			const user = await (await fetch(url)).json();
 			const { name, email } = user;
 			const picture = user.picture.data.url;
+
+			// 檢查是否已使用本地方式註冊過
 			let userQuery = 'SELECT email FROM users WHERE email = ?';
 			const [is_signup] = await connection.execute(userQuery, [email]);
 			if (is_signup.length != 0) {
 				return res.status(403).json({ error: 'This account is signup by native, please login by native' });
 			}
+
+			// 將使用者資訊新增至資料庫
 			let facebookQuery = 'INSERT INTO users(name, email, password, picture, provider) VALUES(?,?,?,?,?)';
 			const [signup] = await connection.execute(facebookQuery, [name, email, '', picture, 'facebook']);
 			let id = signup.insertId;
+
+			// 回傳登入成功的回應，包含 access_token 和使用者資訊
 			const response = {
 				'data': {
 					'access_token': access_token,
@@ -161,16 +190,18 @@ router.post('/signin', async (req, res) => {
 			res.json(response);
 		}
 		else {
+			// 如果 provider 參數錯誤
 			res.status(403).json({ error: 'Wrong provider' });
 		}
 	}
 	catch (err) {
+		// 若有任何錯誤，回傳伺服器錯誤並顯示錯誤訊息在後端
 		res.status(500).json({ error: "Server Error." });
 		console.log(err);
 	}
 });
 
-
+// 取得使用者個人資料 API
 router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
 	const user_id = Number(req.params.id);
@@ -179,8 +210,9 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 	const friendship_key = `friendship_${my_id}_${user_id}`;
 	let friendship = null;
 
-	const Query = 
-	`
+	// 查詢使用者個人資料及與當前使用者的好友關係
+	const Query =
+		`
 	SELECT
 		users.id,
 		users.name,
@@ -201,10 +233,13 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 	ON (sender_id = users.id OR receiver_id = users.id) AND (sender_id = ? OR receiver_id = ?)
 	WHERE users.id = ?
 	`;
+
+	// 從快取中查詢使用者資料和好友關係
 	const profile_cachedResult = await redisSearch(profile_key);
 	const friendship_cachedResult = await redisSearch(friendship_key);
 
-	if(profile_cachedResult !== null && friendship_cachedResult !== null){
+	// 若資料存在於快取中，則直接回傳快取中的資料
+	if (profile_cachedResult !== null && friendship_cachedResult !== null) {
 		const response = {
 			data: {
 				user: {
@@ -221,17 +256,20 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 		return res.json(response);
 	}
 
-	try{
+	try {
+		// 從資料庫中查詢使用者個人資料及好友關係
 		const result = (await connection.execute(Query, [my_id, my_id, user_id]))[0][0];
-		if(my_id !== user_id){
-			if(result.friendship_id){
+
+		// 若當前使用者不是查詢的使用者本人，則處理好友關係
+		if (my_id !== user_id) {
+			if (result.friendship_id) {
 				if (result.status === 1) {
 					friendship = {
 						id: result.friendship_id,
-						status:'friend',
+						status: 'friend',
 					};
 				}
-				else{
+				else {
 					if (result.sender_id === my_id) {
 						friendship = {
 							id: result.friendship_id,
@@ -248,6 +286,7 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 			}
 		}
 
+		// 構造回傳的資料並設置快取
 		const response = {
 			data: {
 				user: {
@@ -268,30 +307,34 @@ router.get('/:id/profile', verifyAccesstoken, async (req, res) => {
 			friend_count: result.friend_count,
 			introduction: result.intro,
 			tags: result.tags,
-		}
+		};
 		const friendship_info = {
 			friendship: friendship,
-		}
+		};
 		await redisSet(profile_key, profile_info);
 		await redisSet(friendship_key, friendship_info);
 		return res.json(response);
 	}
-	catch(err){
+	catch (err) {
 		res.status(500).json({ error: "Server Error." });
 		console.log(err);
 	}
 });
 
-
+// 更新使用者個人資料 API
 router.put('/profile', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
-	const id = req.decoded.id;
+	const id = req.decoded.id; // 從解碼的存取權杖中獲取當前使用者的 ID
 	const profile_key = `profile_${id}`;
-	const { name, introduction, tags } = req.body;
+	const { name, introduction, tags } = req.body; // 從請求的資料中獲取要更新的使用者資料
 
-	try{
+	try {
 		const updateQuery = 'UPDATE users SET name = ?, intro = ?, tags = ? where id = ?';
+
+		// 執行 SQL 查詢以更新使用者資料
 		const [rows] = await connection.execute(updateQuery, [name, introduction, tags, id]);
+
+		// 構造回傳的資料，只回傳使用者 ID
 		const response = {
 			"data": {
 				"user": {
@@ -299,46 +342,61 @@ router.put('/profile', verifyAccesstoken, async (req, res) => {
 				}
 			}
 		};
+
+		// 在更新成功後，刪除快取中的使用者資料
 		await redisDelete(profile_key);
+
+		// 回傳成功回應
 		return res.json(response);
 	}
-	catch(err){
+	catch (err) {
 		console.log(err);
 		return res.status(500).json({ error: "Server Error." });
 	}
 });
 
-
+// 更新使用者個人頭像 API
 router.put('/picture', verifyAccesstoken, upload.single('picture'), async (req, res) => {
 	const connection = await connectionPromise;
-	const id = req.decoded.id;
-	const picture = req.file;
+	const id = req.decoded.id; // 從解碼的存取權杖中獲取當前使用者的 ID
+	const picture = req.file; // 從請求中獲取上傳的頭像檔案
 	const profile_key = `profile_${id}`;
-	try{
-		const url = `https://52.64.240.159/${picture.filename}`;
+
+	try {
+		const url = `https://52.64.240.159/${picture.filename}`; // 頭像檔案的 URL 地址
 		const updateQuery = 'UPDATE users SET picture = ? WHERE id = ?';
+
+		// 執行 SQL 查詢以更新使用者的頭像 URL
 		const [rows] = await connection.execute(updateQuery, [url, id]);
+
+		// 構造回傳的資料，回傳更新後的頭像 URL
 		response = {
 			data: {
 				picture: url
 			}
 		}
+
+		// 在更新成功後，刪除快取中的使用者資料
 		await redisDelete(profile_key);
+
+		// 回傳成功回應
 		return res.json(response);
 	}
-	catch(err){
+	catch (err) {
+		// 若有任何錯誤，回傳伺服器錯誤並顯示錯誤訊息在後端
 		res.status(500).json({ error: "Server Error." });
 		console.log(err);
 	}
 });
 
-
+// 使用者搜尋 API
 router.get('/search', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
-	const my_id = req.decoded.id;
-	const keyword = `%${req.query.keyword}%`;
+	const my_id = req.decoded.id; // 從解碼的存取權杖中獲取當前使用者的 ID
+	const keyword = `%${req.query.keyword}%`; // 從請求中取得搜尋的關鍵字，並加上通配符 %
 
-	console.log(keyword);
+	console.log(keyword); // 輸出搜尋的關鍵字至後端的控制台
+
 	let searchQuery = 
 	`
 		SELECT 
@@ -354,9 +412,11 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 		WHERE name LIKE ? AND users.id <> ?
 	`;
 
-	try{
+	try {
+		// 執行 SQL 查詢以搜尋符合條件的使用者
 		const [search_result] = await connection.execute(searchQuery, [my_id, my_id, keyword, my_id]);
 
+		// 將搜尋結果轉換為指定格式的使用者陣列
 		const userArr = search_result.map((user) => {
 			let friendship = null;
 			if (user.is_friend === 1) {
@@ -385,18 +445,23 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 			};
 		});
 		
+		// 構造回傳的資料，回傳搜尋結果的使用者陣列
 		const response = {
 			"data": {
 				"users": userArr
 			}
 		}
+
+		// 回傳成功回應
 		return res.json(response);
 	}
 	catch(err){
+		// 若有任何錯誤，回傳伺服器錯誤並顯示錯誤訊息在後端
 		res.status(500).json({ error: "Server Error." });
 		console.log(err);
 	}
 });
+
 
 
 
