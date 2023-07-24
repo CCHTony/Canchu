@@ -1,7 +1,6 @@
 // __tests__/router.test.js
 
 const express = require('express');
-const request = require('supertest');
 const router = require('../router/users'); // 导入要测试的路由
 
 jest.mock('../models/mysql', () => ({
