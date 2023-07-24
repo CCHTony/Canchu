@@ -205,6 +205,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 	// Get post details
 	let encodedNextCursor;
 	
+	console.log(order_key);
 	let order = await redisSearch(order_key);
 	if(order){
 		console.log(order);
