@@ -59,6 +59,7 @@ router.post('/:id/like', verifyAccesstoken, async (req, res) => {
 	const post_id = req.params.id;
 	const my_id = req.decoded.id;
 	const postKey = `post_${post_id}`;
+	const likeKey = `like_${my_id}_${post_id}`;
 
 	let likeQuery = 'INSERT IGNORE INTO likes (post_id, user_id, created_at) VALUES (?, ?, NOW())';
 	const [like] = await connection.execute(likeQuery, [post_id, my_id]);
@@ -74,6 +75,7 @@ router.post('/:id/like', verifyAccesstoken, async (req, res) => {
 		}
 	}
 	await redisDelete(postKey);
+	await redisDelete(likeKey);
 	res.json(response);
 });
 
@@ -83,6 +85,7 @@ router.delete('/:id/like', verifyAccesstoken, async (req, res) => {
 	const post_id = req.params.id;
 	const my_id = req.decoded.id;
 	const postKey = `post_${post_id}`;
+	const likeKey = `like_${my_id}_${post_id}`;
 
 	let likeQuery = 'DELETE FROM likes WHERE post_id = ? AND user_id = ?';
 	const [like] = await connection.execute(likeQuery, [post_id, my_id]);
@@ -98,6 +101,7 @@ router.delete('/:id/like', verifyAccesstoken, async (req, res) => {
 		}
 	}
 	await redisDelete(postKey);
+	await redisDelete(likeKey);
 	res.json(response);
 });
 
