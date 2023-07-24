@@ -197,6 +197,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 	let order = await redisSearch(order_key);
 	console.log(order);
 	if(order){
+		console.log('1');
 		for(let i = 0; i < order.length; i++){
 			postKeyArr[i] = `post_${order[i]}`;
 			postArr[i] = await redisSearch(postKeyArr[i]);
