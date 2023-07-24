@@ -202,13 +202,14 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 			postArr[i] = await redisSearch(postKeyArr[i]);
 			console.log(postArr[i]);
 			if(!postArr[i]){
+				console.log('postArr problem');
 				dismatch = true;
 				break;
 			}
 			likeKeyArr[i] = `like${my_id}_${order[i]}`
 			likeArr[i] = await redisSearch(likeKeyArr[i]);
-			if(!likeArr[i]){
-				console.log('1');
+			if(likeArr[i] === null){
+				console.log('likeArr problem');
 				dismatch = true;
 				break;
 			}
