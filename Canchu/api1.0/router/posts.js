@@ -283,7 +283,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 	for(let i = 0; i < order.length; i++){
 		postKeyArr[i] = `post_${order[i]}`;
 		await redisSet(postKeyArr[i],formattedPostsWithoutIsLiked[i]);
-		likeKeyArr[i] = `like${my_id}_${order[i]}`
+		likeKeyArr[i] = `like_${my_id}_${order[i]}`
 		await redisSet(likeKeyArr[i], formattedPosts[i].is_liked);
 	}
 
