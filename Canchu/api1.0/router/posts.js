@@ -1,5 +1,5 @@
 const express = require('express');
-const { redisSearch, redisSet } = require('../models/function');
+const { redisSearch, redisSet, redisDelete } = require('../models/function');
 const router = express.Router();
 
 // create the connection nod to database
@@ -11,6 +11,7 @@ router.post('/', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
 	const my_id = req.decoded.id;
 	const context = req.body.context;
+	const order_key = `user_${my_id}_18446744073709551615`;
 
 	const postQuery = 'INSERT INTO posts (poster_id, created_at, context, like_count, comment_count) VALUES (?, NOW(), ?, ?, ?)';
 	const [post] = await connection.execute(postQuery, [my_id, context, 0, 0]);
@@ -22,6 +23,7 @@ router.post('/', verifyAccesstoken, async (req, res) => {
 			}
 		}
 	}
+	await redisDelete(order_key);
 	res.json(results);
 });
 
@@ -31,6 +33,7 @@ router.put('/:id', verifyAccesstoken, async (req, res) => {
 	const post_id = req.params.id;
 	const context = req.body.context;
 	const my_id = req.decoded.id
+	const postKey = `post_${post_id}`;
 
 	const updateQuery = 'UPDATE posts set context = ? where id = ? AND poster_id = ? ';
 	const [update] = await connection.execute(updateQuery, [context, post_id, my_id]);
@@ -46,6 +49,7 @@ router.put('/:id', verifyAccesstoken, async (req, res) => {
 			}
 		}
 	}
+	await redisDelete(postKey);
 	res.json(response);
 });
 
@@ -54,6 +58,7 @@ router.post('/:id/like', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
 	const post_id = req.params.id;
 	const my_id = req.decoded.id;
+	const postKey = `post_${post_id}`;
 
 	let likeQuery = 'INSERT IGNORE INTO likes (post_id, user_id, created_at) VALUES (?, ?, NOW())';
 	const [like] = await connection.execute(likeQuery, [post_id, my_id]);
@@ -68,6 +73,7 @@ router.post('/:id/like', verifyAccesstoken, async (req, res) => {
 			}
 		}
 	}
+	await redisDelete(postKey);
 	res.json(response);
 });
 
@@ -76,6 +82,7 @@ router.delete('/:id/like', verifyAccesstoken, async (req, res) => {
 	const connection = await connectionPromise;
 	const post_id = req.params.id;
 	const my_id = req.decoded.id;
+	const postKey = `post_${post_id}`;
 
 	let likeQuery = 'DELETE FROM likes WHERE post_id = ? AND user_id = ?';
 	const [like] = await connection.execute(likeQuery, [post_id, my_id]);
@@ -90,6 +97,7 @@ router.delete('/:id/like', verifyAccesstoken, async (req, res) => {
 			}
 		}
 	}
+	await redisDelete(postKey);
 	res.json(response);
 });
 
@@ -99,6 +107,7 @@ router.post('/:id/comment', verifyAccesstoken, async (req, res) => {
 	const post_id = Number.parseInt(req.params.id);
 	const my_id = req.decoded.id;
 	const content = req.body.content;
+	const postKey = `post_${post_id}`;
 
 	try{
 		const postQuery = 'INSERT INTO comments (post_id, user_id, created_at, content) VALUES (?, ?, NOW(), ?)';
@@ -114,6 +123,7 @@ router.post('/:id/comment', verifyAccesstoken, async (req, res) => {
 				}
 			}
 		}
+		await redisDelete(postKey);
 		res.json(response);
 	}
 	catch(err){
@@ -205,7 +215,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 				dismatch = true;
 				break;
 			}
-			likeKeyArr[i] = `like${my_id}_${order[i]}`
+			likeKeyArr[i] = `like_${my_id}_${order[i]}`
 			likeArr[i] = await redisSearch(likeKeyArr[i]);
 			if(likeArr[i] === null){
 				console.log('likeArr problem');
