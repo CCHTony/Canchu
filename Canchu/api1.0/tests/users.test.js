@@ -1,84 +1,83 @@
-// __tests__/router.test.js
+const request = require('supertest'); // 引入 supertest 来发送请求
+const express = require('express'); // 引入 Express 框架
+const app = express(); // 创建 Express 应用
 
-const express = require('express');
-const router = require('../router/users'); // 导入要测试的路由
+// 引入 router 文件，注意这里需要修改文件路径
+const router = require('../path/to/router-file');
 
-jest.mock('../models/mysql', () => ({
-  connectionPromise: Promise.resolve({
-    // 模拟数据库连接的对象
-    execute: jest.fn((query, params) => {
-      // 模拟数据库查询，这里可以根据需要返回不同的测试数据
-      if (query.startsWith('SELECT')) {
-        // 模拟SELECT查询
-        if (query.includes('users WHERE email = ?')) {
-          // 模拟检查用户是否存在
-          if (params[0] === 'existing@example.com') {
-            return [[{ email: 'existing@example.com' }]]; // 用户已存在
-          }
-          return [[]]; // 用户不存在
-        } else if (query.includes('users WHERE email = ? AND password = ?')) {
-          // 模拟验证用户密码
-          if (params[0] === 'existing@example.com' && params[1] === 'hashed_password') {
-            return [[{ id: 1, name: 'Existing User', email: 'existing@example.com', password: 'hashed_password' }]]; // 用户密码正确
-          }
-          return [[]]; // 用户密码不正确
-        }
-      } else if (query.startsWith('INSERT INTO users')) {
-        // 模拟插入新用户
-        return [{ insertId: 2 }];
-      } else if (query.startsWith('UPDATE users')) {
-        // 模拟更新用户信息
-        return [[{ id: 1 }]];
-      }
-      return [[]];
-    }),
-  }),
-}));
+// 将路由添加到应用中
+app.use('/', router);
 
-jest.mock('jsonwebtoken', () => ({
-  sign: jest.fn(() => 'mocked_jwt'), // 模拟签发JWT的函数，返回一个假的JWT
-}));
+describe('Signup API', () => {
+  // 测试注册成功的情况
+  it('should register a new user and return access_token and user data', async () => {
+    const newUser = {
+      name: 'John Doe',
+      email: 'johndoe@example.com',
+      password: 'secretpassword',
+    };
 
-const app = express();
-app.use(express.json());
-app.use('/', router); // 在Express应用中使用我们的路由
-
-describe('POST /signup', () => {
-  it('should return 400 if missing required fields', async () => {
+    // 使用 supertest 发送 POST 请求
     const response = await request(app)
       .post('/signup')
-      .send({});
-    expect(response.statusCode).toBe(400);
+      .send(newUser);
+
+    // 断言返回状态码为 200
+    expect(response.status).toBe(200);
+
+    // 断言返回结果中包含 access_token 和 user 数据
+    expect(response.body.data).toHaveProperty('access_token');
+    expect(response.body.data.user).toHaveProperty('id');
+    expect(response.body.data.user.name).toBe(newUser.name);
+    expect(response.body.data.user.email).toBe(newUser.email);
+    expect(response.body.data.user.provider).toBe('native');
+    expect(response.body.data.user.picture).toBe(null);
+  });
+
+  // 测试必填字段缺失的情况
+  it('should return 400 status and error message for missing fields', async () => {
+    const newUser = {
+      email: 'johndoe@example.com',
+      password: 'secretpassword',
+    };
+
+    const response = await request(app)
+      .post('/signup')
+      .send(newUser);
+
+    expect(response.status).toBe(400);
     expect(response.body.error).toBe('All fields (name, email, password) must be entered.');
   });
 
-  it('should return 400 if email format is invalid', async () => {
+  // 测试无效的 email 地址
+  it('should return 400 status and error message for invalid email address', async () => {
+    const newUser = {
+      name: 'John Doe',
+      email: 'invalidemail',
+      password: 'secretpassword',
+    };
+
     const response = await request(app)
       .post('/signup')
-      .send({ name: 'Test User', email: 'invalid_email', password: '123456' });
-    expect(response.statusCode).toBe(400);
+      .send(newUser);
+
+    expect(response.status).toBe(400);
     expect(response.body.error).toBe('Invalid email address.');
   });
 
-  it('should return 403 if email is already registered', async () => {
+  // 测试已存在的 email 地址
+  it('should return 403 status and error message for duplicate email address', async () => {
+    const newUser = {
+      name: 'John Doe',
+      email: 'existingemail@example.com',
+      password: 'secretpassword',
+    };
+
     const response = await request(app)
       .post('/signup')
-      .send({ name: 'Test User', email: 'existing@example.com', password: '123456' });
-    expect(response.statusCode).toBe(403);
+      .send(newUser);
+
+    expect(response.status).toBe(403);
     expect(response.body.error).toBe('It should not be possible to register with a duplicate email.');
   });
-
-  it('should return 200 and JWT token if signup is successful', async () => {
-    const response = await request(app)
-      .post('/signup')
-      .send({ name: 'New User', email: 'newuser@example.com', password: '123456' });
-    expect(response.statusCode).toBe(200);
-    expect(response.body.data).toBeDefined();
-    expect(response.body.data.access_token).toBe('mocked_jwt'); // 使用模拟的JWT
-    expect(response.body.data.user).toBeDefined();
-    expect(response.body.data.user.id).toBe(2); // 使用模拟的插入用户的ID
-    expect(response.body.data.user.name).toBe('New User');
-    expect(response.body.data.user.email).toBe('newuser@example.com');
-  });
 });
-
