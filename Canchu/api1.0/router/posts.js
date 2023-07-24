@@ -129,9 +129,12 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 	let search_id = req.query.user_id;
 	let cursor = req.query.cursor;
 	const my_id = req.decoded.id;
-	let postSeries_key = null;
-	let postKeyArr = new Array(10);
-	let postArr = new Array(10);
+	let order_key = null;
+	let postKeyArr = [];
+	let postArr = [];
+	let likeKeyArr = [];
+	let likeArr =[];
+	
 	let dismatch = false;
 
 	let postIdCursor = 18446744073709551615n;
@@ -177,7 +180,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 	else{
 		condition = `WHERE users.id = ? AND posts.id <= ? `;
 		param = [my_id, search_id, postIdCursor];
-		postSeries_key = `user_${search_id}_${postIdCursor}`;
+		order_key = `user_${search_id}_${postIdCursor}`;
 	}
 
 	const suffix = 
@@ -189,52 +192,93 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 	postQuery += (condition + suffix);
 
 	// Get post details
-
-	const postSeries_result = await redisSearch(postSeries_key);
-	if(postSeries_result){
-		for(let i = 0; i < 10; i++){
-			postKeyArr[i] = `post_${my_id}_${postSeries_result[i]}`;
+	let encodedNextCursor;
+	
+	let order = await redisSearch(order_key);
+	if(order_key){
+		for(let i = 0; i < order.length; i++){
+			postKeyArr[i] = `post_${order[i]}`;
 			postArr[i] = await redisSearch(postKeyArr[i]);
-			if(postArr[i] == null ){
+			if(!postArr[i]){
 				dismatch = true;
+				break;
+			}
+			likeKeyArr[i] = `like${my_id}_${order[i]}`
+			likeArr[i] = await redisSearch(likeKeyArr[i]);
+			if(!likeArr[i]){
+				dismatch = true;
+				break;
 			}
 		}
+		if(dismatch === false){
+			if(postArr.length === 11){
+				const nextCursor = order[order.length-1];
+				encodedNextCursor = btoa(nextCursor.toString());
+			}
+			else{
+				encodedNextCursor = null;
+			}
+			const formattedPosts = postArr.map((post, i) => {
+				post.is_like = likeArr[i]; 
+				return post;
+			});
+			const display_post = formattedPosts.slice(0, 10);
+			const response = {
+				data: {
+					posts: display_post,
+					next_cursor: encodedNextCursor
+				}
+			};
+			return res.json(response)
+		}
 	}
-	if(postCached_result){
-		return res.json(postCached_result);
-	}
+	
 	let [posts] = await connection.execute(postQuery, param);
-	console.log(posts);
-
-	let encodedNextCursor;
+	
 	if(posts.length === 11){
 		const nextCursor = posts[posts.length - 1].id;
   	encodedNextCursor = btoa(nextCursor.toString());
-		posts = posts.slice(0, 10);
 	}
 	else{
 		encodedNextCursor = null;
 	}
 
-  const formattedPosts = posts.map((post) => ({
-    id: post.id,
-    user_id: post.user_id,
-    created_at: post.created_at,
-    context: post.context,
-    is_liked: post.is_liked === 1,
-    like_count: post.like_count,
-    comment_count: post.comment_count,
-    picture: post.picture,
-    name: post.name
-  }));
+	order =[];
+  const formattedPosts = posts.map((post) => {
+		// 在 map 函式中同時將 id 存儲到 order 陣列中
+		order.push(post.id);
+	
+		// 格式化 post 物件並返回
+		return {
+			id: post.id,
+			user_id: post.user_id,
+			created_at: post.created_at,
+			context: post.context,
+			is_liked: post.is_liked === 1,
+			like_count: post.like_count,
+			comment_count: post.comment_count,
+			picture: post.picture,
+			name: post.name
+		};
+	});
 
-	 const response = {
+	if(order_key){
+		await redisSet(order_key,order);
+		const formattedPostsWithoutIsLiked = formattedPosts.map(({ is_liked, ...rest }) => rest);
+		for(let i = 0; i < order.length; i++){
+			postKeyArr[i] = `post_${order[i]}`;
+			await redisSet(postKeyArr[i],formattedPostsWithoutIsLiked[i]);
+			likeKeyArr[i] = `like${my_id}_${order[i]}`
+			await redisSet(likeKeyArr[i], formattedPosts[i].is_liked);
+		}
+	}
+	const display_post = formattedPosts.slice(0, 10);
+	const response = {
     data: {
-      posts: formattedPosts,
+      posts: display_post,
       next_cursor: encodedNextCursor
     }
   };
-	await redisSet(post_key, response)
   return res.json(response);
 });
 
