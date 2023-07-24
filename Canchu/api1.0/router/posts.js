@@ -229,6 +229,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 					next_cursor: encodedNextCursor
 				}
 			};
+			console.log('cache');
 			return res.json(response)
 		}
 	}
@@ -263,6 +264,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 	});
 
 	if(order_key){
+		console.log('DB');
 		await redisSet(order_key,order);
 		const formattedPostsWithoutIsLiked = formattedPosts.map(({ is_liked, ...rest }) => rest);
 		for(let i = 0; i < order.length; i++){
