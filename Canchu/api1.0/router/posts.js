@@ -269,8 +269,6 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 
 	
 	console.log('DB');
-	console.log(order_key);
-	console.log(order);
 	await redisSet(order_key,order);
 	const formattedPostsWithoutIsLiked = formattedPosts.map(({ is_liked, ...rest }) => rest);
 	for(let i = 0; i < order.length; i++){
