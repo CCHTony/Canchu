@@ -206,8 +206,9 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 	
 	let order = await redisSearch(order_key);
 	if(order){
-		
+		console.log(order);
 		for(let i = 0; i < order.length; i++){
+
 			postKeyArr[i] = `post_${order[i]}`;
 			postArr[i] = await redisSearch(postKeyArr[i]);
 			if(!postArr[i]){
@@ -226,6 +227,7 @@ router.get('/search', verifyAccesstoken, async (req, res) => {
 		if(dismatch === false){
 			if(postArr.length === 11){
 				const nextCursor = order[order.length-1];
+				console.log(nextCursor);
 				encodedNextCursor = btoa(nextCursor.toString());
 			}
 			else{
