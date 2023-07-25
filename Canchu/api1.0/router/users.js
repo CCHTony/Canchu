@@ -14,6 +14,8 @@ const redisSet = require('../models/function').redisSet;
 // 引入驗證 Access Token 的函式
 const verifyAccesstoken = require('../models/function').verifyAccesstoken;
 
+const TryErr = require('../utils/TryandError').TryErr;
+
 // 設定 multer 的存儲方式和目的地
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -26,70 +28,63 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-async function signup(req, res){
+async function Signup(req, res){
 	const connection = await connectionPromise;
-	try {
-		const { name, email, password } = req.body;
+	const { name, email, password } = req.body;
 
-		// 檢查必填欄位是否都有輸入
-		if (!name || !password || !email) {
-			return res.status(400).json({ error: 'All fields (name, email, password) must be entered.' });
-		}
+	// 檢查必填欄位是否都有輸入
+	if (!name || !password || !email) {
+		return res.status(400).json({ error: 'All fields (name, email, password) must be entered.' });
+	}
 
-		// 檢查 email 格式是否正確
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		if (!emailRegex.test(email)) {
-			return res.status(400).json({ error: 'Invalid email address.' });
-		}
+	// 檢查 email 格式是否正確
+	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+	if (!emailRegex.test(email)) {
+		return res.status(400).json({ error: 'Invalid email address.' });
+	}
 
-		// 檢查是否已經有相同的 email 註冊過
-		let userQuery = 'SELECT email FROM users WHERE email = ?';
-		const [rows] = await connection.execute(userQuery, [email]);
-		if (rows.length != 0) {
-			return res.status(403).json({ error: 'It should not be possible to register with a duplicate email.' });
-		}
+	// 檢查是否已經有相同的 email 註冊過
+	let userQuery = 'SELECT email FROM users WHERE email = ?';
+	const [rows] = await connection.execute(userQuery, [email]);
+	if (rows.length != 0) {
+		return res.status(403).json({ error: 'It should not be possible to register with a duplicate email.' });
+	}
 
-		// 使用 crypto 加密密碼
-		const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
+	// 使用 crypto 加密密碼
+	const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
 
-		// 執行註冊的 SQL 查詢
-		let signupQuery = 'INSERT INTO users(name, email, password, picture, provider) VALUES(?,?,?,?,?)';
-		const [results] = await connection.execute(signupQuery, [name, email, hashedPassword, null, 'native']);
-		let id = results.insertId;
+	// 執行註冊的 SQL 查詢
+	let signupQuery = 'INSERT INTO users(name, email, password, picture, provider) VALUES(?,?,?,?,?)';
+	const [results] = await connection.execute(signupQuery, [name, email, hashedPassword, null, 'native']);
+	let id = results.insertId;
 
-		// 創建用於 JWT 的 payload
-		const payload = {
-			"id": id,
-			"name": name,
-			"email": email,
-			"provider": 'native',
-			"picture": null
-		};
+	// 創建用於 JWT 的 payload
+	const payload = {
+		"id": id,
+		"name": name,
+		"email": email,
+		"provider": 'native',
+		"picture": null
+	};
 
-		// 創建包含註冊資訊和 JWT 的回應
-		const response = {
-			'data': {
-				'access_token': jwt.sign(payload, process.env.SECRETKEY, { expiresIn: '1 day' }),
-				"user": {
-					"id": id,
-					"name": name,
-					"email": email,
-					"provider": 'native',
-					"picture": null
-				}
+	// 創建包含註冊資訊和 JWT 的回應
+	const response = {
+		'data': {
+			'access_token': jwt.sign(payload, process.env.SECRETKEY, { expiresIn: '1 day' }),
+			"user": {
+				"id": id,
+				"name": name,
+				"email": email,
+				"provider": 'native',
+				"picture": null
 			}
-		};
-		res.json(response);
-	}
-	catch (err) {
-		// 若有任何錯誤，回傳伺服器錯誤並顯示錯誤訊息在後端
-		res.status(500).json({ error: "Server Error." });
-		console.log(err);
-	}
+		}
+	};
+	res.json(response);
 }
 
 // 使用者註冊 API
-router.post('/signup', (req, res) => signup(req, res));
+router.post('/signup', (req, res) => TryErr(Signup(req, res)));
 
 // 使用者登入 API
 router.post('/signin', async (req, res) => {
