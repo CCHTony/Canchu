@@ -2,6 +2,7 @@ const express = require('express'); // 引入 Express 框架
 const router = express.Router(); // 創建一個路由 (router) 物件
 
 const { createPost, updatePost, Like, deleteLike, Comment, searchPost, detail} = require('../Controller/postsController')
+// 引入自訂的 TryErr 函式，用於處理錯誤並統一回傳格式
 const TryErr = require('../utils/TryandError').TryErr;
 
 // 引入存取權杖驗證的功能
