@@ -4,11 +4,11 @@ const {app} = require('../server'); // 引入你的 Express 應用程式
 
 // 測試使用者註冊 API
 describe('Signup API', () => {
-  it('should register a new user and return access_token and user data', async () => {
+  it('should register a new user and return user data', async () => {
     // 模擬請求的使用者資料
     const userData = {
       name: 'John Doe',
-      email: 'john.doe@example.com',
+      email: 'joh123n.doe@example.com',
       password: 'password123',
     };
 
