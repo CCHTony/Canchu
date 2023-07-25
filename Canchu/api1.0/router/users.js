@@ -1,7 +1,6 @@
 // 引入所需的模組和套件
 const express = require('express'); // 引入 Express 框架
 const router = express.Router(); // 建立 Express 路由器
-const multer = require('multer'); // 引入 multer 套件，用於處理上傳檔案
 
 // 引入 usersController 中的函式
 const { 
