@@ -19,6 +19,20 @@ const upload = require('../utils/multer');
 // 引入自訂的 TryErr 函式，用於處理錯誤並統一回傳格式
 const TryErr = require('../utils/TryandError').TryErr;
 
+const multer = require('multer'); // 引入 multer 套件，用於處理上傳檔案
+
+// 設定 multer 的存儲方式和目的地
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public')
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now()
+    cb(null, file.fieldname + '-' + uniqueSuffix + '.jpg')
+  }
+});
+const upload2 = multer({ storage: storage });
+
 
 // 使用者註冊 API
 router.post('/signup', (req, res) => TryErr(Signup(req, res), res));
@@ -34,7 +48,9 @@ router.put('/test_upload',  (req, res) => {
 	console.log(upload)
 	console.log(upload.upload)
 })
-
+router.put('/test_upload2',  (req, res) => {
+	console.log(upload2)
+})
 
 // 使用者搜尋 API
 router.get('/search', verifyAccesstoken, (req, res) => TryErr(Search(req, res), res));
