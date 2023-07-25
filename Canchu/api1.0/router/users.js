@@ -36,7 +36,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // 使用者註冊 API
-router.post('/signup', (req, res) => TryErr(Signup(req, res), res));
+router.post('/signup', TryErr(Signup(req, res), res));
 // 使用者登入 API
 router.post('/signin', (req, res) => TryErr(Signin(req, res)));
 // 取得使用者個人資料 API
