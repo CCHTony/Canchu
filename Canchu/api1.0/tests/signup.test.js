@@ -8,7 +8,7 @@ describe('Signup API', () => {
     // 模擬請求的使用者資料
     const userData = {
       name: 'John Doe',
-      email: 'joh12n.doe@example.com',
+      email: 'joh1n.doe@example.com',
       password: 'password123',
     };
 
