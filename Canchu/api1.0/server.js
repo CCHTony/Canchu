@@ -35,3 +35,7 @@ app.use('/api/1.0/posts', postsRouter);
 app.listen(3000, () => {
 	console.log('Server is running');
 });
+
+module.exports = {
+	app
+}

@@ -1,6 +1,17 @@
 const request = require('supertest');
 const {app} = require('../server'); // 引入你的 Express 應用程式
 
+
+beforeAll(() => {
+  server = app.listen(3000, () => {
+    console.log('Server is running');
+  });
+});
+
+afterAll((done) => {
+  server.close(done);
+});
+
 // 測試使用者註冊 API
 describe('Signup API', () => {
   it('should register a new user and return access_token and user data', async () => {
@@ -22,3 +33,4 @@ describe('Signup API', () => {
 
   // 可以新增更多的測試用例，測試不同情境下的 API 行為
 });
+
