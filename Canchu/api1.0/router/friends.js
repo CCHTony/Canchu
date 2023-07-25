@@ -3,8 +3,10 @@ const router = express.Router();
 
 
 const { getFriend, sendFriendRequest, getFriendRequest, agreeFriendRequest, deleteFriend} = require('../Controller/friendsController')
-// create the connection nod to database
+
 const verifyAccesstoken = require('../models/function').verifyAccesstoken;
+
+const TryErr = require('../utils/TryandError').TryErr;
 
 
 router.get('/', verifyAccesstoken, (req, res) => TryErr(getFriend(req, res), res));

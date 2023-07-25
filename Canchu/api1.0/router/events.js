@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
+const TryErr = require('../utils/TryandError').TryErr;
+
 const { getEvent, readEvent } = require('../Controller/eventsController')
 
 const verifyAccesstoken = require('../models/function').verifyAccesstoken;
