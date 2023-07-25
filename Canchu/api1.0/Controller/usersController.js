@@ -4,10 +4,9 @@ const crypto = require('crypto'); // 引入 crypto 套件，用於加密處理
 
 // 引入資料庫連線
 const connectionPromise = require('../models/mysql').connectionPromise;
-// 引入 Redis 相關函式
-const redisSearch = require('../models/function').redisSearch;
-const redisDelete = require('../models/function').redisDelete;
-const redisSet = require('../models/function').redisSet;
+ // 引入自訂的 Redis 功能模組
+const { redisSearch, redisSet, redisDelete } = require('../models/function');
+
 
 async function Signup(req, res){
 	const connection = await connectionPromise;

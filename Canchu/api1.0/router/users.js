@@ -3,12 +3,7 @@ const express = require('express'); // 引入 Express 框架
 const router = express.Router(); // 建立 Express 路由器
 const multer = require('multer'); // 引入 multer 套件，用於處理上傳檔案
 
-const Signup = require('../Controller/usersController').Signup;
-const Signin = require('../Controller/usersController').Signin;
-const getProfile = require('../Controller/usersController').getProfile;
-const updateProfile = require('../Controller/usersController').updateProfile;
-const updatePicture = require('../Controller/usersController').updatePicture;
-const Search = require('../Controller/usersController').Search
+const { Signup, Signin, getProfile, updateProfile, updatePicture, Search } = require('../Controller/usersController')
 // 引入驗證 Access Token 的函式
 const verifyAccesstoken = require('../models/function').verifyAccesstoken;
 
