@@ -8,6 +8,7 @@ const connectionPromise = require('../models/mysql').connectionPromise;
 const { redisSearch, redisSet, redisDelete } = require('../models/function');
 
 
+// 使用者註冊 API
 async function Signup(req, res){
 	const connection = await connectionPromise;
 	const { name, email, password } = req.body;
@@ -177,7 +178,7 @@ async function getProfile(req, res){
 
 	// 查詢使用者個人資料及與當前使用者的好友關係
 	const Query =
-		`
+	`
 	SELECT
 		users.id,
 		users.name,
