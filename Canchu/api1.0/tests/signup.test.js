@@ -29,3 +29,21 @@ describe('Signup API', () => {
   });
 });
 
+// 測試使用者註冊 API
+describe('Signup API', () => {
+  it('should register a new user and return user data', async () => {
+    // 模擬請求的使用者資料
+    const userData = {
+      email: 'joh1n.doe@example.com',
+      password: 'password123',
+    };
+
+    // 在這裡使用 supertest 來發送 POST 請求，模擬使用者註冊
+    const res = await request(app)
+      .post('/api/1.0/users/signup')
+      .send(userData);
+
+    // 確認伺服器回應的狀態碼是否正確
+    expect(res.status).toBe(400);
+  });
+});
