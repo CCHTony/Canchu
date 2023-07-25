@@ -8,7 +8,7 @@ describe('Signup API', () => {
     // 模擬請求的使用者資料
     const userData = {
       name: 'John Doe',
-      email: 'joh123n.doe@example.com',
+      email: 'joh12n.doe@example.com',
       password: 'password123',
     };
 
@@ -19,8 +19,13 @@ describe('Signup API', () => {
 
     // 確認伺服器回應的狀態碼是否正確
     expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('data');
+    expect(res.body.data).toHaveProperty('access_token');
+    expect(res.body.data).toHaveProperty('user');
+    expect(res.body.data.user.name).toBe(userData.name);
+    expect(res.body.data.user.email).toBe(userData.email);
+    expect(res.body.data.user.provider).toBe('native');
+    expect(res.body.data.user.picture).toBeNull();
   });
-
-  // 可以新增更多的測試用例，測試不同情境下的 API 行為
 });
 
