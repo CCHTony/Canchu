@@ -15,7 +15,7 @@ const {
 // 引入驗證 Access Token 的函式
 const verifyAccesstoken = require('../models/function').verifyAccesstoken;
 // 引入 multer 套件，用於處理上傳檔案
-const upload = require('../utils/multer').upload;
+const upload = require('../utils/multer');
 // 引入自訂的 TryErr 函式，用於處理錯誤並統一回傳格式
 const TryErr = require('../utils/TryandError').TryErr;
 
@@ -29,7 +29,13 @@ router.get('/:id/profile', verifyAccesstoken, (req, res) => TryErr(getProfile(re
 // 更新使用者個人資料 API
 router.put('/profile', verifyAccesstoken, (req, res) => TryErr(updateProfile(req, res), res))
 // 更新使用者個人頭像 API
-router.put('/picture', verifyAccesstoken, upload.single('picture'), (req, res) => TryErr(updatePicture(req, res), res))
+// router.put('/picture', verifyAccesstoken, upload.single('picture'), (req, res) => TryErr(updatePicture(req, res), res))
+router.put('/test_upload',  (req, res) => {
+	console.log(upload)
+	console.log(upload.upload)
+})
+
+
 // 使用者搜尋 API
 router.get('/search', verifyAccesstoken, (req, res) => TryErr(Search(req, res), res));
 

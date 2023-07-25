@@ -62,7 +62,6 @@ async function Signup(req, res){
 	};
 	res.json(response);
 }
-
 // 使用者登入 API
 async function Signin(req, res){
 	const connection = await connectionPromise;
@@ -167,7 +166,6 @@ async function Signin(req, res){
     res.status(403).json({ error: 'Wrong provider' });
   }
 }
-
 // 取得使用者個人資料 API
 async function getProfile(req, res){
 	const connection = await connectionPromise;
@@ -281,7 +279,6 @@ async function getProfile(req, res){
   await redisSet(friendship_key, friendship_info);
   return res.json(response);
 }
-
 // 更新使用者個人資料 API
 async function updateProfile(req, res){
 	const connection = await connectionPromise;
@@ -309,7 +306,6 @@ async function updateProfile(req, res){
   // 回傳成功回應
   return res.json(response);
 };
-
 // 更新使用者個人頭像 API
 async function updatePicture(req, res){
 	const connection = await connectionPromise;
@@ -336,7 +332,6 @@ async function updatePicture(req, res){
   // 回傳成功回應
   return res.json(response);
 }
-
 // 使用者搜尋 API
 async function Search(req, res){
 	const connection = await connectionPromise;
