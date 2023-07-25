@@ -26,8 +26,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// 使用者註冊 API
-router.post('/signup', async (req, res) => {
+async function signup(req, res){
 	const connection = await connectionPromise;
 	try {
 		const { name, email, password } = req.body;
@@ -87,7 +86,10 @@ router.post('/signup', async (req, res) => {
 		res.status(500).json({ error: "Server Error." });
 		console.log(err);
 	}
-});
+}
+
+// 使用者註冊 API
+router.post('/signup', (req, res) => signup(req, res));
 
 // 使用者登入 API
 router.post('/signin', async (req, res) => {
