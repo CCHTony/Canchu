@@ -15,7 +15,7 @@ const {
 // 引入驗證 Access Token 的函式
 const verifyAccesstoken = require('../models/function').verifyAccesstoken;
 // 引入 multer 套件，用於處理上傳檔案
-const upload = require('../utils/multer');
+const { upload } = require('../utils/multer');
 // 引入自訂的 TryErr 函式，用於處理錯誤並統一回傳格式
 const TryErr = require('../utils/TryandError').TryErr;
 
