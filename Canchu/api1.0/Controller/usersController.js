@@ -1,7 +1,6 @@
 // 引入所需的模組和套件
 const jwt = require('jsonwebtoken'); // 引入 JSON Web Token 套件，用於處理身份驗證
 const crypto = require('crypto'); // 引入 crypto 套件，用於加密處理
-const multer = require('multer'); // 引入 multer 套件，用於處理上傳檔案
 
 // 引入資料庫連線
 const connectionPromise = require('../models/mysql').connectionPromise;
@@ -9,19 +8,6 @@ const connectionPromise = require('../models/mysql').connectionPromise;
 const redisSearch = require('../models/function').redisSearch;
 const redisDelete = require('../models/function').redisDelete;
 const redisSet = require('../models/function').redisSet;
-
-
-// 設定 multer 的存儲方式和目的地
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'public')
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now()
-    cb(null, file.fieldname + '-' + uniqueSuffix + '.jpg')
-  }
-});
-const upload = multer({ storage: storage });
 
 async function Signup(req, res){
 	const connection = await connectionPromise;
