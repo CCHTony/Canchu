@@ -33,7 +33,7 @@ router.post('/signin', (req, res) => TryErr(Signin(req, res), res));
 // 取得使用者個人資料 API
 router.get('/:id/profile', verifyAccesstoken, (req, res) => TryErr(getProfile(req, res), res))
 // 更新使用者個人資料 API
-router.put('/profile', verifyAccesstoken, (req, res) => TryErr(updateProfile(req, res)), res)
+router.put('/profile', verifyAccesstoken, (req, res) => TryErr(updateProfile(req, res), res))
 // 更新使用者個人頭像 API
 router.put('/picture', verifyAccesstoken, upload.single('picture'), (req, res) => TryErr(updatePicture(req, res), res))
 // 使用者搜尋 API
