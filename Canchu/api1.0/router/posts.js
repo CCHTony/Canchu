@@ -2,7 +2,7 @@ const express = require('express'); // 引入 Express 框架
 const router = express.Router(); // 創建一個路由 (router) 物件
 
 const { createPost, updatePost, Like, deleteLike, Comment, searchPost, detail} = require('../Controller/postsController')
-
+const TryErr = require('../utils/TryandError').TryErr;
 
 // 引入存取權杖驗證的功能
 const verifyAccesstoken = require('../models/function').verifyAccesstoken;

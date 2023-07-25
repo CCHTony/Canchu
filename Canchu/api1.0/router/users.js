@@ -29,15 +29,15 @@ const upload = multer({ storage: storage });
 // 使用者註冊 API
 router.post('/signup', (req, res) => TryErr(Signup(req, res), res));
 // 使用者登入 API
-router.post('/signin', (req, res) => TryErr(Signin(req, res)));
+router.post('/signin', (req, res) => TryErr(Signin(req, res), res));
 // 取得使用者個人資料 API
-router.get('/:id/profile', verifyAccesstoken, (req, res) => TryErr(getProfile(req, res)))
+router.get('/:id/profile', verifyAccesstoken, (req, res) => TryErr(getProfile(req, res), res))
 // 更新使用者個人資料 API
-router.put('/profile', verifyAccesstoken, (req, res) => TryErr(updateProfile(req, res)))
+router.put('/profile', verifyAccesstoken, (req, res) => TryErr(updateProfile(req, res)), res)
 // 更新使用者個人頭像 API
-router.put('/picture', verifyAccesstoken, upload.single('picture'), (req, res) => TryErr(updatePicture(req, res)))
+router.put('/picture', verifyAccesstoken, upload.single('picture'), (req, res) => TryErr(updatePicture(req, res), res))
 // 使用者搜尋 API
-router.get('/search', verifyAccesstoken, (req, res) => TryErr(Search(req, res)));
+router.get('/search', verifyAccesstoken, (req, res) => TryErr(Search(req, res), res));
 
 
 module.exports = router;
