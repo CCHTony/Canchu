@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../router/users'); // 引入你的 Express 應用程式
+const {app} = require('../server'); // 引入你的 Express 應用程式
 
 // beforeAll(async () => {
 //   // 啟動應用程式
@@ -8,6 +8,10 @@ const app = require('../router/users'); // 引入你的 Express 應用程式
 //   });
 // });
 
+afterAll((done) => {
+  // 關閉應用程式並釋放端口
+  app.listen(3000).close(done);
+});
 
 // 成功註冊
 describe('Signin', () => {
@@ -21,7 +25,7 @@ describe('Signin', () => {
 
     // 在這裡使用 supertest 來發送 POST 請求，模擬使用者註冊
     const res = await request(app)
-      .post('/signin')
+      .post('/api/1.0/users/signin')
       .send(userData);
 
     // 確認伺服器回應的狀態碼是否正確
@@ -45,7 +49,7 @@ describe('missing provider', () => {
 
     // 在這裡使用 supertest 來發送 POST 請求，模擬使用者註冊
     const res = await request(app)
-      .post('/signin')
+      .post('/api/1.0/users/signin')
       .send(userData);
 
     // 確認伺服器回應的狀態碼是否正確
@@ -64,7 +68,7 @@ describe('missing email', () => {
 
     // 在這裡使用 supertest 來發送 POST 請求，模擬使用者註冊
     const res = await request(app)
-      .post('/signin')
+      .post('/api/1.0/users/signin')
       .send(userData);
 
     // 確認伺服器回應的狀態碼是否正確
@@ -83,7 +87,7 @@ describe('missing password', () => {
 
     // 在這裡使用 supertest 來發送 POST 請求，模擬使用者註冊
     const res = await request(app)
-      .post('/signin')
+      .post('/api/1.0/users/signin')
       .send(userData);
 
     // 確認伺服器回應的狀態碼是否正確
@@ -104,7 +108,7 @@ describe('user not found', () => {
 
     // 在這裡使用 supertest 來發送 POST 請求，模擬使用者註冊
     const res = await request(app)
-      .post('/signin')
+      .post('/api/1.0/users/signin')
       .send(userData);
 
     // 確認伺服器回應的狀態碼是否正確
@@ -124,7 +128,7 @@ describe('wrong password', () => {
 
     // 在這裡使用 supertest 來發送 POST 請求，模擬使用者註冊
     const res = await request(app)
-      .post('/signin')
+      .post('/api/1.0/users/signin')
       .send(userData);
 
     // 確認伺服器回應的狀態碼是否正確

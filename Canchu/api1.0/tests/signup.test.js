@@ -1,6 +1,10 @@
 const request = require('supertest');
 const {app} = require('../server'); // 引入你的 Express 應用程式
 
+afterAll((done) => {
+  // 關閉應用程式並釋放端口
+  app.listen(3000).close(done);
+});
 
 // 成功註冊
 describe('Signup', () => {
