@@ -23,7 +23,7 @@ async function Signup(req, res){
 		return res.status(400).json({ error: 'Invalid email address.' });
 	}
 
-  const result = usersSignup(name, email, password);
+  const result = await usersSignup(name, email, password);
   if(result.status !== 200){
     return res.status(result.status).json(result.message);
   }
