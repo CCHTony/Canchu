@@ -1,4 +1,4 @@
-const { redisSearch, redisSet, redisDelete } = require('../models/function'); // 引入自訂的 Redis 功能模組
+const { redisSearch, redisSet, redisDelete } = require('../utils/function'); // 引入自訂的 Redis 功能模組
 
 // 創建與資料庫的連線 (connection promise)
 const connectionPromise = require('../models/mysql').connectionPromise;

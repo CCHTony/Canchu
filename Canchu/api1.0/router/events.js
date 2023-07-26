@@ -11,7 +11,7 @@ const {
 // 引入自訂的 TryErr 函式，用於處理錯誤並統一回傳格式
 const TryErr = require('../utils/TryandError').TryErr;
 // 引入自訂的驗證函式 verifyAccesstoken，用於驗證使用者的存取權限
-const verifyAccesstoken = require('../models/function').verifyAccesstoken;
+const verifyAccesstoken = require('../utils/function').verifyAccesstoken;
 
 // 設定路由，並指定相對應的處理函式，並且使用 verifyAccesstoken 函式來進行身份驗證
 router.get('/', verifyAccesstoken, (req, res) => TryErr(getEvent(req, res), res));

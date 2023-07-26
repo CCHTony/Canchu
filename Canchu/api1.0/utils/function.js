@@ -56,6 +56,13 @@ async function redisSet(key, value) {
   }
 }
 
+function checkEmailRegex(email){
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+	if (!emailRegex.test(email)) {
+		return false;
+	}
+  return true;
+}
 
 
 
@@ -65,5 +72,6 @@ module.exports = {
 	verifyAccesstoken,
 	redisSearch,
 	redisDelete,
-	redisSet
+	redisSet,
+  checkEmailRegex
 };

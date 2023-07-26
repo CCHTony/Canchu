@@ -12,7 +12,7 @@ const {
 } = require('../Controller/friendsController');
 
 // 引入自訂的驗證函式 verifyAccesstoken，用於驗證使用者的存取權限
-const verifyAccesstoken = require('../models/function').verifyAccesstoken;
+const verifyAccesstoken = require('../utils/function').verifyAccesstoken;
 // 引入自訂的 TryErr 函式，用於處理錯誤並統一回傳格式
 const TryErr = require('../utils/TryandError').TryErr;
 

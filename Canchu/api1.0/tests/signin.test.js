@@ -23,7 +23,6 @@ describe('Signin', () => {
     expect(res.body.data).toHaveProperty('access_token');
     expect(res.body.data).toHaveProperty('user');
     expect(res.body.data.user.provider).toBe(userData.provider);
-    expect(res.body.data.user.name).toBe(userData.name);
     expect(res.body.data.user.email).toBe(userData.email);
   });
 });

@@ -6,7 +6,7 @@ const { createPost, updatePost, Like, deleteLike, Comment, searchPost, detail} =
 const TryErr = require('../utils/TryandError').TryErr;
 
 // 引入存取權杖驗證的功能
-const verifyAccesstoken = require('../models/function').verifyAccesstoken;
+const verifyAccesstoken = require('../utils/function').verifyAccesstoken;
 
 // 新增帖子的路由處理函式
 router.post('/', verifyAccesstoken, (req, res) => TryErr(createPost(req, res), res));
