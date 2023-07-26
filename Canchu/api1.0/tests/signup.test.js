@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../tests/a.test'); // 引入你的 Express 應用程式
+const {app} = require('../server'); // 引入你的 Express 應用程式
 
 
 // 成功註冊
