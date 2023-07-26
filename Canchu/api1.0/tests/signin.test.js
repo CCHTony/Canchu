@@ -1,6 +1,18 @@
 const request = require('supertest');
 const {app} = require('../server'); // 引入你的 Express 應用程式
 
+beforeAll(async () => {
+  // 啟動應用程式
+  server = app.listen(3000, () => {
+    console.log(`Server is running on port ${port}`);
+  });
+});
+
+afterAll((done) => {
+  // 關閉應用程式並釋放端口
+  server.close(done);
+});
+
 
 // 成功註冊
 describe('Signin', () => {
