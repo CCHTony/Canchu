@@ -1,11 +1,11 @@
 const redis = require('../models/redis').redis;
 
 const LIMIT_REQ = 10;
-const LIMIT_TIME = 60;
+const LIMIT_TIME = 1;
 const BLOCK_TIME = 30;
 
 async function rateLimiter(req, res, next){
-  const clientIp = req.header["X-Forwarded-For"];
+  const clientIp = req.header['X-Forwarded-For'];
   const key = `rate_limit_${clientIp}`;
   try {
     // 使用 INCR 命令對計數進行自增操作

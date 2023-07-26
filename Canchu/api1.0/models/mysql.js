@@ -4,7 +4,7 @@ const connectionPromise =  mysql.createConnection({
     host: 'localhost',
     user: 'user',
     password: process.env.PASSWORD,
-    database: 'canchu'
+    database: process.env.DATABASE
 });
 
 
