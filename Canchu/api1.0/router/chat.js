@@ -13,7 +13,7 @@ const verifyAccesstoken = require('../utils/function').verifyAccesstoken;
 const TryErr = require('../utils/TryandError').TryErr;
 
 
-router.post('/chat/:user_id', verifyAccesstoken, (req, res) => TryErr(sendMessage(req, res), res));
+router.post('/:user_id', verifyAccesstoken, (req, res) => TryErr(sendMessage(req, res), res));
 
 
 // 匯出這些路由設定
