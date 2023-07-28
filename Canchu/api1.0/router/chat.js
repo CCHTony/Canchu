@@ -3,6 +3,7 @@ const express = require('express'); // 引入 Express 框架
 const router = express.Router(); // 建立 Express 路由器
 
 const {
+  sendMessage,
 
 } = require('../Controller/chatController')
 
@@ -12,7 +13,7 @@ const verifyAccesstoken = require('../utils/function').verifyAccesstoken;
 const TryErr = require('../utils/TryandError').TryErr;
 
 
-router.post('/', verifyAccesstoken, (req, res) => TryErr(createGroup(req, res), res));
+router.post('/chat/:user_id', verifyAccesstoken, (req, res) => TryErr(sendMessage(req, res), res));
 
 
 // 匯出這些路由設定
