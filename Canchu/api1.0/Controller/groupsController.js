@@ -209,8 +209,59 @@ async function createPost(req, res) {
   return res.json(results);
 }
 
+async function getGroupPosts(req, res) {
+  const connection = await connectionPromise; // 創建與資料庫的連線 (connection promise)
+  const group_id = req.params.group_id; // 從請求中取得群組 ID
+  const my_id = req.decoded.id; // 從解碼的存取權杖中獲取當前使用者的 ID
 
+  // 檢查使用者是否在該群組中
+  const checkMembershipQuery = 'SELECT user_group.user_id FROM user_group WHERE group_id = ? AND user_id = ? AND status = true';
+  const [membershipRows] = await connection.execute(checkMembershipQuery, [group_id, my_id]);
 
+  // 如果使用者不在群組中，返回 400 錯誤
+  if (membershipRows.length === 0) {
+    return res.status(400).json({ error: 'You are not in this group.' });
+  }
+
+  // 查詢群組內所有的帖子
+  const getPostsQuery = 
+  `
+  SELECT 
+    group_posts.id, 
+    group_posts.group_id, 
+    group_posts.user_id, 
+    group_posts.context, 
+    DATE_FORMAT(CONVERT_TZ(group_posts.created_at, '+00:00', '+08:00'), "%Y-%m-%d %H:%i:%s") AS created_at, 
+    users.name AS user_name, 
+    users.picture AS user_picture 
+  FROM group_posts JOIN users 
+  ON group_posts.user_id = users.id 
+  WHERE group_id = ? ORDER BY created_at DESC`;
+  const [postRows] = await connection.execute(getPostsQuery, [group_id]);
+
+  // 整理帖子資料，添加相關信息
+  const posts = postRows.map((post) => {
+    return {
+      id: post.id,
+      user_id: post.user_id,
+      created_at: post.created_at,
+      context: post.context,
+      is_liked: false,
+      like_count: 0,
+      comment_count: 0,
+      picture: post.user_picture,
+      name: post.user_name,
+    };
+  });
+
+  const results = {
+    data: {
+      posts: posts,
+    },
+  };
+
+  return res.status(200).json(results);
+}
 
 
 module.exports = {
@@ -219,5 +270,6 @@ module.exports = {
   joinGroup,
   getPendingMembers,
   approveMembership,
-  createPost
+  createPost,
+  getGroupPosts
 }

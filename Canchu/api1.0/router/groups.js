@@ -8,7 +8,8 @@ const {
   joinGroup,
   getPendingMembers,
   approveMembership,
-  createPost
+  createPost,
+  getGroupPosts
 
 } = require('../Controller/groupsController')
 
@@ -24,6 +25,7 @@ router.post('/:group_id/join', verifyAccesstoken, (req, res) => TryErr(joinGroup
 router.get('/:group_id/join', verifyAccesstoken, (req, res) => TryErr(getPendingMembers(req, res), res));
 router.post('/:group_id/member/:user_id/agree', verifyAccesstoken, (req, res) => TryErr(approveMembership(req, res), res));
 router.post('/:group_id/post', verifyAccesstoken, (req, res) => TryErr(createPost(req, res), res));
+router.get('/:group_id/posts', verifyAccesstoken, (req, res) => TryErr(getGroupPosts(req, res), res));
 
 
 // 匯出這些路由設定
