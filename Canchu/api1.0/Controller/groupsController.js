@@ -195,10 +195,10 @@ async function createPost(req, res) {
   const results = {
     "data": {
       "group": {
-        "id": parseInt(group_id)
+        "id": group_id
       },
       "user": {
-        "id": parseInt(my_id)
+        "id": my_id
       },
       "post": {
         "id": post.insertId
@@ -206,7 +206,7 @@ async function createPost(req, res) {
     }
   };
 
-  res.json(results);
+  return res.json(results);
 }
 
 
@@ -218,5 +218,6 @@ module.exports = {
   deleteGroup,
   joinGroup,
   getPendingMembers,
-  approveMembership
+  approveMembership,
+  createPost
 }
