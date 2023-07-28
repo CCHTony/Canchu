@@ -4,7 +4,8 @@ const router = express.Router(); // 建立 Express 路由器
 
 const {
   createGroup,
-  deleteGroup
+  deleteGroup,
+  joinGroup
 } = require('../Controller/groupsController')
 // 引入驗證 Access Token 的函式
 const verifyAccesstoken = require('../utils/function').verifyAccesstoken;
@@ -14,6 +15,7 @@ const TryErr = require('../utils/TryandError').TryErr;
 
 router.post('/', verifyAccesstoken, (req, res) => TryErr(createGroup(req, res), res));
 router.delete('/:group_id', verifyAccesstoken, (req, res) => TryErr(deleteGroup(req, res), res));
+router.post('/', verifyAccesstoken, (req, res) => TryErr(createGroup(req, res), res));
 
 
 // 匯出這些路由設定

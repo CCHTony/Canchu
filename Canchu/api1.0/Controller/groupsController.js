@@ -61,8 +61,42 @@ async function deleteGroup(req, res) {
   res.json(results);
 }
 
+async function joinGroup(req, res) {
+  const connection = await connectionPromise; // 創建與資料庫的連線 (connection promise)
+  const my_id = req.decoded.id; // 從解碼的存取權杖中獲取當前使用者的 ID
+  const group_id = req.params.group_id; // 從請求中取得要加入的群組 ID
+
+  // 查詢群組創建者的 ID
+  const creatorIdQuery = 'SELECT creator_id FROM groups_info WHERE id = ?';
+  const [creatorRows] = await connection.execute(creatorIdQuery, [group_id]);
+  if (creatorRows.length === 0) {
+    return res.status(400).json({ error: 'Group not found.' });
+  }
+
+  const creator_id = creatorRows[0].creator_id;
+
+  // 檢查是否為群組的創建者，創建者不能申請加入自己的群組
+  if (my_id === creator_id) {
+    return res.status(400).json({ error: 'Creators cannot apply to join their own group.' });
+  }
+
+  // 執行加入群組的 SQL 
+  const insertQuery = 'INSERT INTO user_group(user_id, group_id, false) VALUES(?,?)';
+  await connection.execute(insertQuery, [my_id, group_id]);
+
+  const results = {
+    "data": {
+      "group": {
+        "id": parseInt(group_id)
+      }
+    }
+  };
+  res.json(results);
+}
+
 
 module.exports = {
   createGroup,
-  deleteGroup
+  deleteGroup,
+  joinGroup
 }
