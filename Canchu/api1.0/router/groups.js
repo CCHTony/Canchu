@@ -6,7 +6,9 @@ const {
   createGroup,
   deleteGroup,
   joinGroup,
-  getPendingMembers
+  getPendingMembers,
+  approveMembership
+  
 } = require('../Controller/groupsController')
 
 // 引入驗證 Access Token 的函式
@@ -19,6 +21,7 @@ router.post('/', verifyAccesstoken, (req, res) => TryErr(createGroup(req, res), 
 router.delete('/:group_id', verifyAccesstoken, (req, res) => TryErr(deleteGroup(req, res), res));
 router.post('/:group_id/join', verifyAccesstoken, (req, res) => TryErr(joinGroup(req, res), res));
 router.get('/:group_id/join', verifyAccesstoken, (req, res) => TryErr(getPendingMembers(req, res), res));
+router.post('/:group_id/member/:user_id/agree', verifyAccesstoken, (req, res) => TryErr(approveMembership(req, res), res));
 
 
 // 匯出這些路由設定

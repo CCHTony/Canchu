@@ -132,11 +132,53 @@ async function getPendingMembers(req, res) {
   return res.status(200).json(results);
 }
 
+// 假設您已經建立了適當的路由和授權中間件，這裡僅展示approveMembership函數的程式碼
+
+async function approveMembership(req, res) {
+  const connection = await connectionPromise; // 創建與資料庫的連線 (connection promise)
+  const group_id = req.params.group_id; // 從請求中取得群組 ID
+  const user_id = req.params.user_id; // 從請求中取得用戶 ID
+
+  // 檢查用戶是否為該群組的創建者
+  const checkCreatorQuery = 'SELECT creator_id FROM groups_info WHERE id = ?';
+  const [creatorRows] = await connection.execute(checkCreatorQuery, [group_id]);
+  if (creatorRows.length === 0) {
+    return res.status(400).json({ error: 'Group not found.' });
+  }
+
+  const creator_id = creatorRows[0].creator_id;
+  const my_id = req.decoded.id; // 從解碼的存取權杖中獲取當前使用者的 ID
+
+  // 判斷使用者是否為群組的創建者
+  if (my_id !== creator_id) {
+    return res.status(400).json({ error: 'You are not authorized to approve membership applications for this group.' });
+  }
+
+  // 更新用戶在群組中的狀態為已同意
+  const approveMembershipQuery = 'UPDATE user_group SET status = true WHERE group_id = ? AND user_id = ?';
+  const [updateResult] = await connection.execute(approveMembershipQuery, [group_id, user_id]);
+
+  // 檢查是否成功更新資料
+  if (updateResult.affectedRows === 0) {
+    return res.status(400).json({ error: 'User not found or membership application is already approved.' });
+  }
+
+  const results = {
+    "data": {
+      "user": {
+        "id": user_id
+      }
+    }
+  };
+
+  return res.status(200).json(results);
+}
 
 
 module.exports = {
   createGroup,
   deleteGroup,
   joinGroup,
-  getPendingMembers
+  getPendingMembers,
+  approveMembership
 }
