@@ -27,6 +27,7 @@ const friendsRouter = require('./router/friends');
 const eventsRouter = require('./router/events');
 const postsRouter = require('./router/posts');
 const groupsRouter = require('./router/groups');
+const chatRouter = require('./router/chat');
 
 // 設定路由，將路由模組套用到相對應的路徑上
 app.use('/api/1.0/users', usersRouter);
@@ -34,5 +35,6 @@ app.use('/api/1.0/friends', friendsRouter);
 app.use('/api/1.0/events', eventsRouter);
 app.use('/api/1.0/posts', postsRouter);
 app.use('/api/1.0/groups', groupsRouter);
+app.use('/api/1.0/chat', chatRouter);
 
 module.exports = app
