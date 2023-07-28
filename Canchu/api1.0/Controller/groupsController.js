@@ -80,6 +80,13 @@ async function joinGroup(req, res) {
     return res.status(400).json({ error: 'Creators cannot apply to join their own group.' });
   }
 
+  // 檢查用戶是否已經是群組的成員
+  const checkMembershipQuery = 'SELECT id FROM user_group WHERE user_id = ? AND group_id = ?';
+  const [membershipRows] = await connection.execute(checkMembershipQuery, [my_id, group_id]);
+  if (membershipRows.length > 0) {
+    return res.status(400).json({ error: 'You have already applied to join this group.' });
+  }
+
   // 執行加入群組的 SQL 
   const insertQuery = 'INSERT INTO user_group(user_id, group_id, status) VALUES(?,?,false)';
   await connection.execute(insertQuery, [my_id, group_id]);
@@ -87,7 +94,7 @@ async function joinGroup(req, res) {
   const results = {
     "data": {
       "group": {
-        "id": parseInt(group_id)
+        "id": group_id
       }
     }
   };
