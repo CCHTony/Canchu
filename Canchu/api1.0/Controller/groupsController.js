@@ -101,9 +101,42 @@ async function joinGroup(req, res) {
   res.json(results);
 }
 
+async function getPendingMembers(req, res) {
+  const connection = await connectionPromise; // 創建與資料庫的連線 (connection promise)
+  const group_id = req.params.group_id; // 從請求中取得群組 ID
+
+  // 檢查用戶是否為該群組的創建者
+  const checkCreatorQuery = 'SELECT creator_id FROM groups_info WHERE id = ?';
+  const [creatorRows] = await connection.execute(checkCreatorQuery, [group_id]);
+  if (creatorRows.length === 0) {
+    return res.status(400).json({ error: 'Group not found.' });
+  }
+
+  const creator_id = creatorRows[0].creator_id;
+  const my_id = req.decoded.id; // 從解碼的存取權杖中獲取當前使用者的 ID
+
+  // 判斷使用者是否有權限查看等待加入的成員信息
+  if (my_id !== creator_id) {
+    return res.status(400).json({ error: 'You are not authorized to view pending members of this group.' });
+  }
+
+  // 查詢等待加入的成員信息
+  const getPendingMembersQuery = 'SELECT u.id, u.name, u.picture, "pending" AS status FROM users u INNER JOIN user_group ug ON u.id = ug.user_id WHERE ug.group_id = ? AND ug.status = false';
+  const [pendingMembersRows] = await connection.execute(getPendingMembersQuery, [group_id]);
+
+  const results = {
+    "data": {
+      "users": pendingMembersRows
+    }
+  };
+  return res.status(200).json(results);
+}
+
+
 
 module.exports = {
   createGroup,
   deleteGroup,
-  joinGroup
+  joinGroup,
+  getPendingMembers
 }

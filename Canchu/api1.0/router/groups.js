@@ -16,6 +16,7 @@ const TryErr = require('../utils/TryandError').TryErr;
 router.post('/', verifyAccesstoken, (req, res) => TryErr(createGroup(req, res), res));
 router.delete('/:group_id', verifyAccesstoken, (req, res) => TryErr(deleteGroup(req, res), res));
 router.post('/:group_id/join', verifyAccesstoken, (req, res) => TryErr(joinGroup(req, res), res));
+router.post('/:group_id/join', verifyAccesstoken, (req, res) => TryErr(joinGroup(req, res), res));
 
 
 // 匯出這些路由設定
