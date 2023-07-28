@@ -7,11 +7,6 @@ async function sendMessage(req, res) {
   const sender_id = req.decoded.id; // 從解碼的存取權杖中獲取當前使用者的 ID
   const message = req.body.message; // 從請求中取得訊息內容
 
-  // 檢查發送者是否與接收者相同
-  if (sender_id === receiver_id) {
-    return res.status(400).json({ error: 'You cannot send a message to yourself.' });
-  }
-
   // 檢查接收者是否存在
   const checkReceiverQuery = 'SELECT id FROM users WHERE id = ?';
   const [receiverRows] = await connection.execute(checkReceiverQuery, [receiver_id]);
@@ -113,10 +108,10 @@ async function getConversationMessages(req, res) {
       },
     };
   });
-
+  const display_messages = messages.slice(0, 10);
   const results = {
     data: {
-      messages: messages,
+      messages: display_messages,
       next_cursor: next_cursor,
     },
   };
