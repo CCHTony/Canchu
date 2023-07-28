@@ -81,7 +81,7 @@ async function joinGroup(req, res) {
   }
 
   // 執行加入群組的 SQL 
-  const insertQuery = 'INSERT INTO user_group(user_id, group_id, false) VALUES(?,?)';
+  const insertQuery = 'INSERT INTO user_group(user_id, group_id, status) VALUES(?,?,false)';
   await connection.execute(insertQuery, [my_id, group_id]);
 
   const results = {
