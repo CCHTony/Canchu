@@ -132,8 +132,6 @@ async function getPendingMembers(req, res) {
   return res.status(200).json(results);
 }
 
-// 假設您已經建立了適當的路由和授權中間件，這裡僅展示approveMembership函數的程式碼
-
 async function approveMembership(req, res) {
   const connection = await connectionPromise; // 創建與資料庫的連線 (connection promise)
   const group_id = req.params.group_id; // 從請求中取得群組 ID
@@ -155,7 +153,7 @@ async function approveMembership(req, res) {
   }
 
   // 更新用戶在群組中的狀態為已同意
-  const approveMembershipQuery = 'UPDATE user_group SET status = true WHERE group_id = ? AND user_id = ?';
+  const approveMembershipQuery = 'UPDATE user_group SET status = true WHERE group_id = ? AND user_id = ? AND status = false';
   const [updateResult] = await connection.execute(approveMembershipQuery, [group_id, user_id]);
 
   // 檢查是否成功更新資料
