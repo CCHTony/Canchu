@@ -7,15 +7,16 @@ async function createGroup(req, res){
 	const my_id = req.decoded.id; // 從解碼的存取權杖中獲取當前使用者的 ID
 	const groupName = req.body.name; // 從請求中取得名字
 
-	const groupNameQuery = 'SELECT groups_info.name FROM groups_info WHERE name = ?';
-	const [rows] = await connection.execute(groupNameQuery, [groupName]);
-	if (rows.length !== 0) {
-    return res.status(400).json({ error: 'This group name has already been used.' });
-	}
-
   // 執行創建的 SQL 
 	const insertQuery = 'INSERT INTO groups_info(name, creator_id) VALUES(?,?)';
 	const [group] = await connection.execute(insertQuery, [groupName, my_id]);
+
+  // 獲取創建的群組 ID
+  const group_id = group.insertId;
+
+  // 將創建者與群組建立關聯，插入到 user_group 表中
+  const insertUserGroupQuery = 'INSERT INTO user_group(user_id, group_id, status) VALUES(?,?,?)';
+  await connection.execute(insertUserGroupQuery, [my_id, group_id, true]); // 假設創建者的狀態為已通過（status = true）
 
   console.log(group);
   const results = {
@@ -171,6 +172,45 @@ async function approveMembership(req, res) {
 
   return res.status(200).json(results);
 }
+
+async function createPost(req, res) {
+  const connection = await connectionPromise; // 創建與資料庫的連線 (connection promise)
+  const group_id = req.params.group_id; // 從請求中取得群組 ID
+  const my_id = req.decoded.id; // 從解碼的存取權杖中獲取當前使用者的 ID
+  const context = req.body.context; // 從請求中取得帖子內容
+
+  // 檢查使用者是否在該群組中
+  const checkMembershipQuery = 'SELECT user_group.user_id FROM user_group WHERE group_id = ? AND user_id = ? AND status = true';
+  const [membershipRows] = await connection.execute(checkMembershipQuery, [group_id, my_id]);
+
+  // 如果使用者不在群組中，返回 400 錯誤
+  if (membershipRows.length === 0) {
+    return res.status(400).json({ error: 'You are not in this group.' });
+  }
+
+  // 執行創建帖子的 SQL 
+  const createPostQuery = 'INSERT INTO group_posts(group_id, user_id, context) VALUES(?,?,?)';
+  const [post] = await connection.execute(createPostQuery, [group_id, my_id, context]);
+
+  const results = {
+    "data": {
+      "group": {
+        "id": parseInt(group_id)
+      },
+      "user": {
+        "id": parseInt(my_id)
+      },
+      "post": {
+        "id": post.insertId
+      }
+    }
+  };
+
+  res.json(results);
+}
+
+
+
 
 
 module.exports = {
