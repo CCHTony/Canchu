@@ -8,7 +8,7 @@ else if(process.env.NODE_ENV === 'test'){
     database = process.env.DATABASEFORTEST;
 }
 
-const connectionPromise =  mysql.createConnection({
+const connectionPromise =  mysql.createPool({
     host: 'localhost',
     user: 'user',
     password: process.env.PASSWORD,
