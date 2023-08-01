@@ -7,11 +7,5 @@ WORKDIR /app
 # 複製 Canchu 專案代碼到容器內的/app目錄
 COPY . /app
 
-# 安裝 Canchu 專案的依賴項
-RUN npm install
-
-# 執行 Canchu 專案所需的設定
-RUN npm run build
-
 # 指定容器運行時的命令
 CMD ["npm", "start"]
