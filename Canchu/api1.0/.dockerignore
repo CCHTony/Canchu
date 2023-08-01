@@ -1,0 +1,5 @@
+# 忽略所有 .git 目錄
+.git
+
+# 忽略 node_modules 目錄
+node_modules
