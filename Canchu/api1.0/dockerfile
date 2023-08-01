@@ -11,7 +11,7 @@ COPY . /app
 RUN npm install
 
 # 聲明容器將監聽的端口
-EXPOSE 4000
+EXPOSE 3000
 
 # 指定容器運行時的命令
 CMD ["npm", "start"]
