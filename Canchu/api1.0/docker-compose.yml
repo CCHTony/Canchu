@@ -8,8 +8,8 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: password
       MYSQL_DATABASE: canchu
-    volumes:
-      - /var/lib/mysql:/var/lib/mysql  
+    # volumes:
+    #   - /var/lib/mysql:/var/lib/mysql  
     networks:
       - canchu_network
 
@@ -18,8 +18,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: canchu_container
-    volumes:
-      - /home/ubuntu/EC2/Canchu/api1.0/public/:/app
+    # volumes:
+    #   - /home/ubuntu/EC2/Canchu/api1.0/public/:/app
     networks:
       - canchu_network
 
@@ -45,3 +45,4 @@ services:
 
 networks:
   canchu_network:   
+    driver: bridge
