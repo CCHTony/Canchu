@@ -12,3 +12,5 @@ RUN npm install
 
 # 聲明容器將監聽的端口
 EXPOSE 3000
+
+CMD ["npm start"]
