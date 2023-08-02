@@ -5,7 +5,7 @@ FROM node:20.4-alpine
 WORKDIR /app
 
 # 複製 package.json 到容器內的/app目錄
-COPY package.json ./
+COPY ../package.json ./
 
 # 安裝 Canchu 專案的依賴項
 RUN npm install
