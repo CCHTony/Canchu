@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql:8.0.33
+    container_name: mysql_container
+    environment:
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: canchu
+    volumes:
+      - /var/lib/mysql:/var/lib/mysql  # 這裡掛載了本機目錄 './mysql_data' 到容器的 '/var/lib/mysql'
+    networks:
+      - canchu_network
+
+  canchu:
+    image: canchu_image:latest
+    container_name: canchu_container
+    volumes:
+      - /home/ubuntu/EC2/Canchu/api1.0/public/:/app
+    networks:
+      - canchu_network
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx_container
+    ports:
+      - "80:80"
+    networks:
+      - canchu_network  
+    depends_on:
+      - canchu
+
+networks:
+  canchu_network:   
