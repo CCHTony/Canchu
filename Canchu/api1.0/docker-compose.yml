@@ -4,6 +4,7 @@ services:
   mysql:
     image: mysql:8.0.33
     container_name: mysql_container
+    restart: always
     # environment:
     #   MYSQL_USER: user
     #   MYSQL_PASSWORD: password
@@ -25,22 +26,23 @@ services:
   redis:
     image: redis:6.0.16
     container_name: redis_container
+    restart: always
     networks:
       - canchu_network
 
-  # nginx:
-  #   image: nginx:1.18.0-alpine
-  #   container_name: nginx_container
-  #   ports:
-  #     - "80:80"
-  #   volumes:
-  #     - /etc/nginx/sites-available/myapp.conf:/etc/nginx/conf.d  # 替換為您的設定檔路徑
-  #     - /etc/ssl/certificate.crt:/etc/nginx/ssl  # 替換為您的 SSL 證書路徑
-  #     - /etc/ssl/private/private.key:/etc/ssl/private/private.key  # 替換為 SSL 私鑰的路徑
-  #   networks:
-  #     - canchu_network  
-  #   depends_on:
-  #     - canchu
+  nginx:
+    image: nginx:1.18.0
+    container_name: nginx_container
+    ports:
+      - "80:80"
+    volumes:
+      - /etc/nginx/sites-available/myapp.conf:/etc/nginx/conf.d  # 替換為您的設定檔路徑
+      - /etc/ssl/certificate.crt:/etc/nginx/ssl  # 替換為您的 SSL 證書路徑
+      - /etc/ssl/private/private.key:/etc/ssl/private/private.key  # 替換為 SSL 私鑰的路徑
+    networks:
+      - canchu_network  
+    depends_on:
+      - canchu
 
 networks:
   canchu_network:   
