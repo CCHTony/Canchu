@@ -5,7 +5,7 @@ FROM node:20.4-alpine
 WORKDIR /app
 
 # 複製 Canchu 專案代碼到容器內的/app目錄
-COPY . /app
+COPY . .
 
 # 安裝 Canchu 專案的依賴項
 RUN npm install
