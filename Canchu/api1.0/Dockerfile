@@ -13,4 +13,4 @@ RUN npm install
 # 聲明容器將監聽的端口
 EXPOSE 3000
 
-CMD ["NODE_ENV=develop pm2 start start.js"] 
+CMD ["npm", "run", "start"]

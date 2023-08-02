@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "jest",
-    "start": "NODE_ENV=develop node start.js"
+    "start": "NODE_ENV=develop pm2 start start.js"
   },
   "author": "",
   "license": "ISC",
