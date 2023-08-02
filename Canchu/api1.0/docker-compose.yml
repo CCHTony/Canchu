@@ -14,7 +14,9 @@ services:
       - canchu_network
 
   canchu:
-    image: canchu_image:latest
+    build: 
+      context: .
+      dockerfile: Dockerfile
     container_name: canchu_container
     volumes:
       - /home/ubuntu/EC2/Canchu/api1.0/public/:/app
