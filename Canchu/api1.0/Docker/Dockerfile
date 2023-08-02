@@ -1,5 +1,5 @@
 # 使用 Node.js 官方映像作為基本映像
-FROM node:20.4
+FROM node:20.4-alpine
 
 # 將工作目錄設置為/app
 WORKDIR /app
