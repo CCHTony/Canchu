@@ -8,6 +8,7 @@ WORKDIR /app
 COPY . /app
 
 # 安裝 Canchu 專案的依賴項
+COPY package.json ./
 RUN npm install
 
 # 聲明容器將監聽的端口
