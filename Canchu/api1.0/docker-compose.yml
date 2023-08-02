@@ -8,8 +8,8 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: password
       MYSQL_DATABASE: canchu
-    # volumes:
-    #   - /var/lib/mysql:/var/lib/mysql  
+    volumes:
+      - /var/lib/mysql:/var/lib/mysql  
     networks:
       - canchu_network
 
