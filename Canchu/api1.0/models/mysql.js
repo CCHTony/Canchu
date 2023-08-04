@@ -9,7 +9,7 @@ else if(process.env.NODE_ENV === 'test'){
 }
 
 const connectionPromise =  mysql.createPool({
-    host: 'localhost',
+    host: 'mysql',
     user: 'user',
     password: process.env.PASSWORD,
     database: database
