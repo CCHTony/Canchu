@@ -12,6 +12,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql  
       - ./canchu_database.sql:/docker-entrypoint-initdb.d/canchu_database.sql
+    command: ["--init-file", "/docker-entrypoint-initdb.d/canchu_database.sql"] 
     networks:
       - canchu_network
 
