@@ -4,7 +4,7 @@ services:
   mysql:
     image: mysql:8.0.33
     container_name: mysql
-    # restart: always
+    restart: always
     volumes:
       - mysql_data:/var/lib/mysql  
       - ./canchu_database.sql:/docker-entrypoint-initdb.d/canchu_database.sql
@@ -43,6 +43,8 @@ services:
       - canchu_network  
     depends_on:
       - canchu
+volumes:
+  mysql_data:
 
 networks:
   canchu_network:   
