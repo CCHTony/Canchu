@@ -3,7 +3,7 @@
 -- Host: localhost    Database: canchu
 -- ------------------------------------------------------
 -- Server version       8.0.33
-
+USE canchu;
 
 CREATE TABLE `comments` IF NOT EXISTS (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
