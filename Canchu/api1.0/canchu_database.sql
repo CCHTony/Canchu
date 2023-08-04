@@ -5,7 +5,7 @@
 -- Server version       8.0.33
 USE canchu;
 
-CREATE TABLE `comments` IF NOT EXISTS (
+CREATE TABLE `comments` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `post_id` bigint unsigned DEFAULT NULL,
   `user_id` bigint unsigned DEFAULT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE `comments` IF NOT EXISTS (
 );
 
 
-CREATE TABLE `events` IF NOT EXISTS (
+CREATE TABLE `events` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `receiver_id` bigint unsigned DEFAULT NULL,
   `sender_id` bigint unsigned DEFAULT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE `events` IF NOT EXISTS (
 );
 
 
-CREATE TABLE `friendship` IF NOT EXISTS (
+CREATE TABLE `friendship` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `sender_id` bigint unsigned NOT NULL,
   `receiver_id` bigint unsigned NOT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE `friendship` IF NOT EXISTS (
 );
 
 
-CREATE TABLE `group_posts` IF NOT EXISTS (
+CREATE TABLE `group_posts` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `group_id` bigint unsigned NOT NULL,
   `user_id` bigint unsigned NOT NULL,
@@ -59,7 +59,7 @@ CREATE TABLE `group_posts` IF NOT EXISTS (
 );
 
 
-CREATE TABLE `groups_info` IF NOT EXISTS (
+CREATE TABLE `groups_info` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `creator_id` bigint unsigned NOT NULL,
@@ -69,7 +69,7 @@ CREATE TABLE `groups_info` IF NOT EXISTS (
 );
 
 
-CREATE TABLE `likes` IF NOT EXISTS (
+CREATE TABLE `likes` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `post_id` bigint unsigned DEFAULT NULL,
   `user_id` bigint unsigned DEFAULT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE `likes` IF NOT EXISTS (
 );
 
 
-CREATE TABLE `messages` IF NOT EXISTS (
+CREATE TABLE `messages` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `sender_id` bigint unsigned NOT NULL,
   `receiver_id` bigint unsigned NOT NULL,
@@ -96,7 +96,7 @@ CREATE TABLE `messages` IF NOT EXISTS (
 );
 
 
-CREATE TABLE `posts` IF NOT EXISTS (
+CREATE TABLE `posts` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `poster_id` bigint unsigned DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
@@ -109,7 +109,7 @@ CREATE TABLE `posts` IF NOT EXISTS (
 );
 
 
-CREATE TABLE `user_group` IF NOT EXISTS (
+CREATE TABLE `user_group` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint unsigned NOT NULL,
   `group_id` bigint unsigned NOT NULL,
@@ -123,7 +123,7 @@ CREATE TABLE `user_group` IF NOT EXISTS (
 );
 
 
-CREATE TABLE `users` IF NOT EXISTS (
+CREATE TABLE `users` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
