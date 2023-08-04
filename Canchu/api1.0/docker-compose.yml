@@ -19,6 +19,8 @@ services:
     #   - /home/ubuntu/EC2/Canchu/api1.0/public/:/app
     networks:
       - canchu_network
+    ports:
+      - "3000:3000"
 
   redis:
     image: redis:6.0.16
