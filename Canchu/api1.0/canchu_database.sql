@@ -3,6 +3,7 @@
 -- Host: localhost    Database: canchu
 -- ------------------------------------------------------
 -- Server version       8.0.33
+CREATE DATABASE IF NOT EXISTS canchu;
 USE canchu;
 
 CREATE TABLE `comments` (
