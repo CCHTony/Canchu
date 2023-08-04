@@ -6,7 +6,7 @@ services:
     container_name: mysql
     # restart: always
     volumes:
-      - /var/lib/mysql:/var/lib/mysql  
+      - mysql_data:/var/lib/mysql  
       - ./canchu_database.sql:/docker-entrypoint-initdb.d/canchu_database.sql
     networks:
       - canchu_network
