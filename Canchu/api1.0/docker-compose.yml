@@ -7,7 +7,6 @@ services:
     # restart: always
     volumes:
       - /var/lib/mysql:/var/lib/mysql  
-      - /home/ubuntu/EC2/Canchu/api1.0:/home
     networks:
       - canchu_network
 
