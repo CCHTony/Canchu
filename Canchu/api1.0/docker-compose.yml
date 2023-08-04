@@ -7,6 +7,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: onetwothree
+      MYSQL_DATABASE: canchu
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     volumes:
