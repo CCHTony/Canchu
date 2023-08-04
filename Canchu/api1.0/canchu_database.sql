@@ -6,6 +6,34 @@
 CREATE DATABASE IF NOT EXISTS canchu;
 USE canchu;
 
+CREATE TABLE `users` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `picture` varchar(255) DEFAULT NULL,
+  `provider` varchar(255) DEFAULT NULL,
+  `friend_count` bigint unsigned DEFAULT NULL,
+  `intro` varchar(512) DEFAULT NULL,
+  `tags` varchar(512) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+);
+
+
+CREATE TABLE `posts` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `poster_id` bigint unsigned DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `context` text,
+  `like_count` bigint unsigned DEFAULT NULL,
+  `comment_count` bigint unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `poster_id` (`poster_id`),
+  CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`poster_id`) REFERENCES `users` (`id`)
+);
+
+
 CREATE TABLE `comments` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `post_id` bigint unsigned DEFAULT NULL,
@@ -46,6 +74,16 @@ CREATE TABLE `friendship` (
 );
 
 
+CREATE TABLE `groups_info` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `creator_id` bigint unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `creator_id` (`creator_id`),
+  CONSTRAINT `groups_info_ibfk_1` FOREIGN KEY (`creator_id`) REFERENCES `users` (`id`)
+);
+
+
 CREATE TABLE `group_posts` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `group_id` bigint unsigned NOT NULL,
@@ -57,16 +95,6 @@ CREATE TABLE `group_posts` (
   KEY `user_id` (`user_id`),
   CONSTRAINT `group_posts_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `groups_info` (`id`) ON DELETE CASCADE,
   CONSTRAINT `group_posts_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-);
-
-
-CREATE TABLE `groups_info` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `creator_id` bigint unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `creator_id` (`creator_id`),
-  CONSTRAINT `groups_info_ibfk_1` FOREIGN KEY (`creator_id`) REFERENCES `users` (`id`)
 );
 
 
@@ -97,19 +125,6 @@ CREATE TABLE `messages` (
 );
 
 
-CREATE TABLE `posts` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `poster_id` bigint unsigned DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `context` text,
-  `like_count` bigint unsigned DEFAULT NULL,
-  `comment_count` bigint unsigned DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `poster_id` (`poster_id`),
-  CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`poster_id`) REFERENCES `users` (`id`)
-);
-
-
 CREATE TABLE `user_group` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint unsigned NOT NULL,
@@ -124,16 +139,4 @@ CREATE TABLE `user_group` (
 );
 
 
-CREATE TABLE `users` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `picture` varchar(255) DEFAULT NULL,
-  `provider` varchar(255) DEFAULT NULL,
-  `friend_count` bigint unsigned DEFAULT NULL,
-  `intro` varchar(512) DEFAULT NULL,
-  `tags` varchar(512) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`)
-);
+
