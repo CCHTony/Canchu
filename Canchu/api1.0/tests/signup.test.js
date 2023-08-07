@@ -1,6 +1,9 @@
 const request = require('supertest');
 const app = require('../server'); // 引入你的 Express 應用程式
 
+// 在測試程式碼中
+jest.setTimeout(5000); // 設置超時時間為5秒
+
 let server;
 
 beforeAll(() => {
