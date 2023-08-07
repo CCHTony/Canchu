@@ -16,7 +16,7 @@ jobs:
         echo "${{ secrets.ENV }}" > .env
         echo "${{ secrets.PRIVATE_KEY }}" > private/private.key
         echo "${{ secrets.CERTIFICATE }}" > private/certificate.crt
-        docker-compose --env-file up -d
+        docker-compose up -d
     - name: Wait for containers to start
       run: sleep 20
     - name: Run unit test
