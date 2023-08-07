@@ -43,7 +43,7 @@ async function Signup(req, res){
 		'data': {
 			'access_token': jwt.sign(payload, process.env.SECRETKEY, { expiresIn: '1 day' }),
 			"user": {
-				payload
+				...payload
 			}
 		}
 	};

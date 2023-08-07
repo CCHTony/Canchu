@@ -36,10 +36,10 @@ describe('Signup', () => {
     expect(res.body).toHaveProperty('data');
     expect(res.body.data).toHaveProperty('access_token');
     expect(res.body.data).toHaveProperty('user');
-    expect(res.body.data.user.payload.name).toBe(userData.name);
-    expect(res.body.data.user.payload.email).toBe(userData.email);
-    expect(res.body.data.user.payload.provider).toBe('native');
-    expect(res.body.data.user.payload.picture).toBeNull();
+    expect(res.body.data.user.name).toBe(userData.name);
+    expect(res.body.data.user.email).toBe(userData.email);
+    expect(res.body.data.user.provider).toBe('native');
+    expect(res.body.data.user.picture).toBeNull();
   });
 });
 
