@@ -1,6 +1,6 @@
 const redis = require('../models/redis').redis;
 
-const LIMIT_REQ = 10;
+const LIMIT_REQ = 11;
 const LIMIT_TIME = 1;
 const BLOCK_TIME = 30;
 

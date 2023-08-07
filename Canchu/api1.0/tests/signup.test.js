@@ -30,6 +30,7 @@ describe('Signup', () => {
       .post('/api/1.0/users/signup')
       .send(userData);
 
+    console.log(res.body);
     // 確認伺服器回應的狀態碼是否正確
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('data');

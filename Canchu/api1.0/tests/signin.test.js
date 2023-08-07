@@ -105,7 +105,7 @@ describe('user not found', () => {
   it('res.status 403', async () => {
     // 模擬請求的使用者資料
     const userData = {
-      name: 'none',
+      provider: 'none',
       email: 'nobody@example.com',
       password: 'password123',
     };
