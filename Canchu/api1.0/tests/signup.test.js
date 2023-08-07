@@ -21,7 +21,7 @@ describe('Signup', () => {
     // 模擬請求的使用者資料
     const userData = {
       name: 'John Doe',
-      email: 'john123456.doe@example.com',
+      email: 'johndoe@example.com',
       password: 'password123',
     };
 
@@ -67,7 +67,7 @@ describe('Signup again', () => {
     // 模擬請求的使用者資料
     const userData = {
       name: 'John Doe',
-      email: 'john123456.doe@example.com',
+      email: 'johndoe@example.com',
       password: 'password123',
     };
 
@@ -87,7 +87,7 @@ describe('wrong email', () => {
     // 模擬請求的使用者資料
     const userData = {
       name: 'John Doe',
-      email: 'john123456.doeexample.com',
+      email: 'johndoeexample.com',
       password: 'password123',
     };
 
