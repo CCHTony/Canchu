@@ -5,11 +5,11 @@ const app = require('../server'); // 引入你的 Express 應用程式
 beforeAll(async() => {
   // 啟動應用程式
   const userData = {
-    provider: "native",
+    name: 'John Doe',
     email: "john123456.doe@example.com",
     password: "password123"
   };
-  
+
   const res = await request(app)
       .post('/api/1.0/users/signup')
       .send(userData);
