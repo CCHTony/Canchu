@@ -13,12 +13,11 @@ jobs:
     - name: Build docker compose for test
       run: |
         cd Canchu/api1.0
-        echo "${{ secrets.ENV_FILE }}" > .env
-        echo "${{ secrets.ENV_DOCKER_FILE }}" > .env.docker
+        echo "${{ secrets.ENV }}" > .env
         mkdir private
         echo "${{ secrets.PRIVATE_KEY }}" > private/private.key
-        echo "${{ secrets.CERTIFICATE_CRT }}" > private/certificate.crt
-        docker-compose --env-file .env.docker up -d
+        echo "${{ secrets.CERTIFICATE }}" > private/certificate.crt
+        docker-compose --env-file up -d
     - name: Wait for containers to start
       run: sleep 20
     - name: Run unit test
