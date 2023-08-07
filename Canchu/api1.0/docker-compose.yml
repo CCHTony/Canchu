@@ -36,7 +36,7 @@ services:
   nginx:
     image: nginx:1.18.0
     container_name: nginx
-    # restart: always
+    restart: always
     ports:
       - "80:80"
       - "443:443"
