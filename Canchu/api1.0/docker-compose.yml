@@ -41,9 +41,9 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - /etc/nginx/sites-available/myapp.conf:/etc/nginx/conf.d/default.conf  # 替換為您的設定檔路徑
-      - /etc/ssl/certificate.crt:/etc/ssl/certificate.crt  # 替換為您的 SSL 證書路徑
-      - /etc/ssl/private/private.key:/etc/ssl/private/private.key  # 替換為 SSL 私鑰的路徑
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf 
+      - ./private/certificate.crt:/etc/ssl/certificate.crt  # 替換為您的 SSL 證書路徑
+      - ./private/private.key:/etc/ssl/private/private.key  # 替換為 SSL 私鑰的路徑
     networks:
       - canchu_network  
     depends_on:
