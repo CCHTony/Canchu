@@ -39,8 +39,8 @@ jobs:
             mkdir private
           fi
           echo "${{ secrets.ENV }}" > .env
-          echo "${{ secrets.PRIVATE_KEY }}" > private/certificate.crt
-          echo "${{ secrets.CERTIFICATE_CRT }}" > private/private.key
+          echo "${{ secrets.PRIVATE_KEY }}" > private/private.key
+          echo "${{ secrets.CERTIFICATE }}" > private/certificate.crt
           docker-compose down
           docker-compose up --build -d
           docker image prune -af
