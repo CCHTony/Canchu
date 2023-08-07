@@ -20,7 +20,7 @@ jobs:
     - name: Wait for containers to start
       run: sleep 20
     - name: Run unit test
-      run: docker exec canchu npm test -- --watch=false
+      run: docker exec canchu_container npm test -- --watch=false
 
   # deploy_canchu:
   #   needs: test_canchu
