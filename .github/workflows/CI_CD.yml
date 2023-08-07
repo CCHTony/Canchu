@@ -42,5 +42,5 @@ jobs:
           echo "${{ secrets.PRIVATE_KEY }}" > private/private.key
           echo "${{ secrets.CERTIFICATE_CRT }}" > private/certificate.crt
           docker-compose down
-          docker-compose --build -d
+          docker-compose up --build -d
           docker image prune -af
