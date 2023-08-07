@@ -38,6 +38,7 @@ jobs:
           if [ ! -d "private" ]; then
             mkdir private
           fi
+          
           echo "${{ secrets.ENV }}" > .env
           echo "${{ secrets.PRIVATE_KEY }}" > private/private.key
           echo "${{ secrets.CERTIFICATE }}" > private/certificate.crt
