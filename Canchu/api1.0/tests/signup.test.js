@@ -1,9 +1,18 @@
 const request = require('supertest');
 const app = require('../server'); // 引入你的 Express 應用程式
 
+let server;
+
+beforeAll(() => {
+  // 啟動應用程式
+  server = app.listen(3000, () => {
+    console.log(`Server is running on port 3000`);
+  });
+});
+
 afterAll((done) => {
   // 關閉應用程式並釋放端口
-  app.listen(3000).close(done);
+  server.close(done);
 });
 
 // 成功註冊
