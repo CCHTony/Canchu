@@ -1,0 +1,51 @@
+name: canchu workflow
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  test_canchu:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check code
+      uses: actions/checkout@v3
+    - name: Build docker compose for test
+      run: |
+        cd Canchu/api1.0
+        echo "${{ secrets.ENV_FILE }}" > .env
+        echo "${{ secrets.ENV_DOCKER_FILE }}" > .env.docker
+        mkdir private
+        echo "${{ secrets.PRIVATE_KEY }}" > private/private.key
+        echo "${{ secrets.CERTIFICATE_CRT }}" > private/certificate.crt
+        docker-compose --env-file .env.docker up -d
+    - name: Wait for containers to start
+      run: sleep 20
+    - name: Run unit test
+      run: docker exec canchu npm test -- --watch=false
+
+  # deploy_canchu:
+  #   needs: test_canchu
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Deploy to ec2
+  #     uses: appleboy/ssh-action@master
+  #     with:
+  #       host: ${{ secrets.EC2_HOST }}
+  #       username: ${{ secrets.EC2_USERNAME }}
+  #       key: ${{ secrets.EC2_KEY }}
+  #       port: ${{ secrets.EC2_PORT }}
+  #       script: |
+  #         cd Campus-Summer-Back-End
+  #         git pull origin develop
+  #         cd students/pei-yu/Canchu
+  #         if [ ! -d "private" ]; then
+  #           mkdir private
+  #         fi
+  #         echo "${{ secrets.ENV_FILE }}" > .env
+  #         echo "${{ secrets.ENV_DOCKER_FILE }}" > .env.docker
+  #         echo "${{ secrets.PRIVATE_KEY }}" > private/private.key
+  #         echo "${{ secrets.CERTIFICATE_CRT }}" > private/certificate.crt
+  #         docker-compose down
+  #         docker-compose --env-file .env.docker up --build -d
+  #         docker image prune -af
