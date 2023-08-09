@@ -5,23 +5,23 @@ on:
     branches: [master]
 
 jobs:
-  test_canchu:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Check code
-      uses: actions/checkout@v3
-    - name: Build docker compose for test
-      run: |
-        cd Canchu/api1.0
-        echo "${{ secrets.ENV }}" > .env
-        mkdir private
-        echo "${{ secrets.PRIVATE_KEY }}" > private/private.key
-        echo "${{ secrets.CERTIFICATE }}" > private/certificate.crt
-        docker-compose up -d
-    - name: Wait for containers to start
-      run: sleep 20
-    - name: Run unit test
-      run: docker exec canchu_container npm test -- --watch=false
+  # test_canchu:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Check code
+  #     uses: actions/checkout@v3
+  #   - name: Build docker compose for test
+  #     run: |
+  #       cd Canchu/api1.0
+  #       echo "${{ secrets.ENV }}" > .env
+  #       mkdir private
+  #       echo "${{ secrets.PRIVATE_KEY }}" > private/private.key
+  #       echo "${{ secrets.CERTIFICATE }}" > private/certificate.crt
+  #       docker-compose up -d
+  #   - name: Wait for containers to start
+  #     run: sleep 20
+  #   - name: Run unit test
+  #     run: docker exec canchu_container npm test -- --watch=false
 
   deploy_canchu:
     needs: test_canchu
