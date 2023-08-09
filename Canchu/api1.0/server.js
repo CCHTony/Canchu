@@ -20,7 +20,7 @@ app.use(express.static(__dirname + '/public')); // 設定靜態檔案的伺服�
 
 // 將 Rate Limiting 中間件應用到所有路由上，以實現請求速率限制
 //app.use(limiter);
-app.use(rateLimiter);
+// app.use(rateLimiter);
 
 // 引入路由模組
 const usersRouter = require('./router/users');
