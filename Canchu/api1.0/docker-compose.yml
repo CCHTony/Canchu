@@ -34,8 +34,6 @@ services:
       - canchu_network  
     depends_on:
       - canchu
-volumes:
-  mysql_data:
 
 networks:
   canchu_network:   
