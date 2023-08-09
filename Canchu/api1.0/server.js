@@ -37,8 +37,9 @@ app.use('/api/1.0/events', eventsRouter);
 app.use('/api/1.0/posts', postsRouter);
 app.use('/api/1.0/groups', groupsRouter);
 app.use('/api/1.0/chat', chatRouter);
-app.get('/api/1.0/bigdata', () => {
+app.get('/api/1.0/bigdata', (req, res) => {
   generateData();
+  res.send('fineshed')
 })
 
 module.exports = app
