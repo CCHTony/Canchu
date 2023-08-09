@@ -1,6 +1,3 @@
-const { TIMEOUT } = require('dns');
-const { test } = require('node:test');
-
 // 引入資料庫連線
 const connectionPromise = require('./Canchu/api1.0/models/mysql').connectionPromise;
 
@@ -24,5 +21,7 @@ async function generateData(times){
     await connection.execute(postQuery, [id, i , 0, 0]); // 在資料庫中新增帖子
   }
 }
+
+generateData(TIMES);
 
 
