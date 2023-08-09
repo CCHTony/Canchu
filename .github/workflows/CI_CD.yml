@@ -24,7 +24,7 @@ jobs:
   #     run: docker exec canchu_container npm test -- --watch=false
 
   deploy_canchu:
-    needs: test_canchu
+    # needs: test_canchu
     runs-on: ubuntu-latest
     steps:
     - name: Deploy to ec2
