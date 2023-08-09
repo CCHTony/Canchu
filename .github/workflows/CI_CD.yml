@@ -14,7 +14,6 @@ jobs:
       run: |
         cd Canchu/api1.0
         echo "${{ secrets.ENV }}" > .env
-        mkdir private
         echo "${{ secrets.PRIVATE_KEY }}" > private/private.key
         echo "${{ secrets.CERTIFICATE }}" > private/certificate.crt
         docker-compose up -d
