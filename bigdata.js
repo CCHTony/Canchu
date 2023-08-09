@@ -1,3 +1,4 @@
+const crypto = require('crypto'); // 引入 crypto 套件，用於加密處理
 // 引入資料庫連線
 const connectionPromise = require('./Canchu/api1.0/models/mysql').connectionPromise;
 
