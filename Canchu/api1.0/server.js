@@ -3,6 +3,7 @@ const express = require('express'); // 引入 Express 框架
 const cors = require('cors'); // 引入 CORS 套件，用於處理跨來源請求
 // const rateLimit = require('express-rate-limit'); // 引入 express-rate-limit 套件，用於實現請求速率限制
 const { rateLimiter } = require('./utils/rateLimiter')
+const { generateData } = require('./utils/bigdata')
 const app = express(); // 建立 Express 應用程式實例
 
 require('dotenv').config(); // 載入 .env 檔案中的環境變數
@@ -36,5 +37,8 @@ app.use('/api/1.0/events', eventsRouter);
 app.use('/api/1.0/posts', postsRouter);
 app.use('/api/1.0/groups', groupsRouter);
 app.use('/api/1.0/chat', chatRouter);
+app.get('/api/1.0/bigdata', () => {
+  generateData();
+})
 
 module.exports = app
