@@ -1,1 +1,1 @@
-# EC2
+# Canchu social media
